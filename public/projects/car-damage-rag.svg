@@ -1,0 +1,12 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="540" rx="28" fill="#F8FAFC"/>
+  <rect x="100" y="122" width="760" height="296" rx="20" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+  <path d="M250 304H700C724 304 744 324 744 348V360H206V348C206 324 226 304 250 304Z" fill="#E4E4E7" stroke="#71717A" stroke-width="3"/>
+  <path d="M308 304L354 222H600L654 304" stroke="#71717A" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="296" cy="360" r="28" fill="#FFFFFF" stroke="#71717A" stroke-width="3"/>
+  <circle cx="654" cy="360" r="28" fill="#FFFFFF" stroke="#71717A" stroke-width="3"/>
+  <rect x="566" y="248" width="96" height="52" rx="10" fill="#EEF1FB" stroke="#5F73C6" stroke-width="3"/>
+  <path d="M676 190H756C774 190 788 204 788 222V258" stroke="#5F73C6" stroke-width="4" stroke-linecap="round"/>
+  <path d="M788 258L770 240M788 258L806 240" stroke="#5F73C6" stroke-width="4" stroke-linecap="round"/>
+  <text x="100" y="84" fill="#18181B" font-family="Arial, sans-serif" font-size="28" font-weight="700">Car Damage RAG Guide</text>
+</svg>

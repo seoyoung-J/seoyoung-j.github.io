@@ -22,6 +22,8 @@ export const metadata: Metadata = {
 const PAGE_SIZE = 5;
 const BLUR_FADE_DELAY = 0.04;
 
+export const dynamic = "force-static";
+
 export default async function BlogPage({
   searchParams,
 }: {
