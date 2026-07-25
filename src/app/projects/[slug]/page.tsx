@@ -1,13 +1,37 @@
-import { Paragraphs } from "@/components/project-detail/case-section";
-import { ProjectCaseStudy } from "@/components/project-detail/project-case-study";
 import { ProjectHeader } from "@/components/project-detail/project-header";
 import { ProjectNavigation } from "@/components/project-detail/project-navigation";
-import { SimpleArrowList } from "@/components/project-detail/simple-arrow-list";
-import { getAdjacentProjects, getProject, projects } from "@/data/projects";
+import { mdxComponents } from "@/mdx-components";
+import { MDXContent } from "@content-collections/mdx/react";
+import { allProjects } from "content-collections";
 import { notFound } from "next/navigation";
 
+function getSortedProjects() {
+  return [...allProjects].sort((a, b) => a.order - b.order);
+}
+
+function getProject(slug: string) {
+  return allProjects.find((project) => project.slug === slug);
+}
+
+function getAdjacentProjects(slug: string) {
+  const projects = getSortedProjects();
+  const currentIndex = projects.findIndex((project) => project.slug === slug);
+
+  if (currentIndex < 0) {
+    return { previous: undefined, next: undefined };
+  }
+
+  const previousIndex = (currentIndex - 1 + projects.length) % projects.length;
+  const nextIndex = (currentIndex + 1) % projects.length;
+
+  return {
+    previous: projects[previousIndex],
+    next: projects[nextIndex],
+  };
+}
+
 export function generateStaticParams() {
-  return projects.map((project) => ({
+  return allProjects.map((project) => ({
     slug: project.slug,
   }));
 }
@@ -43,54 +67,16 @@ export default async function ProjectPage({
   }
 
   const { previous, next } = getAdjacentProjects(project.slug);
-  const isFullCaseStudy = project.slug === "solar-panel";
 
   return (
     <main className="mx-auto w-full max-w-[800px] px-5 pb-32 pt-28 sm:px-8">
       <ProjectHeader project={project} />
-      <div className="mt-10">
-        {isFullCaseStudy ? (
-          <ProjectCaseStudy project={project} />
-        ) : (
-          <BasicProjectDetail project={project} />
-        )}
-      </div>
+      <article className="mt-10">
+        <MDXContent code={project.mdx} components={mdxComponents} />
+      </article>
       <div className="mt-14">
         <ProjectNavigation previous={previous} next={next} />
       </div>
     </main>
-  );
-}
-
-function BasicProjectDetail({
-  project,
-}: {
-  project: NonNullable<ReturnType<typeof getProject>>;
-}) {
-  return (
-    <div className="space-y-10">
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Summary
-        </h2>
-        <Paragraphs items={[project.summary, project.highlight]} />
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Tech Stack
-        </h2>
-        <SimpleArrowList items={project.techStack} columns />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Next
-        </h2>
-        <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-          상세 Case Study는 추후 실제 구현 내용과 성과를 추가할 예정입니다.
-        </p>
-      </section>
-    </div>
   );
 }

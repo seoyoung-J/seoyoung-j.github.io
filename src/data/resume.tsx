@@ -1,5 +1,4 @@
 import { Icons } from "@/components/icons";
-import { projects } from "@/data/projects";
 import { FolderKanban, HomeIcon, UserRound } from "lucide-react";
 import type React from "react";
 
@@ -97,5 +96,4 @@ export const DATA = {
   work: [] as WorkItem[],
   education: [] as EducationItem[],
   hackathons: [] as HackathonItem[],
-  projects,
 } as const;

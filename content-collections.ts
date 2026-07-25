@@ -8,6 +8,7 @@ const posts = defineCollection({
     name: "posts",
     directory: "content",
     include: "**/*.mdx",
+    exclude: "projects/**/*.mdx",
     schema: z.object({
         title: z.string(),
         publishedAt: z.string(),
@@ -28,7 +29,51 @@ const posts = defineCollection({
     },
 });
 
-export default defineConfig({
-    collections: [posts],
+const projects = defineCollection({
+    name: "projects",
+    directory: "content/projects",
+    include: "*.mdx",
+    schema: z.object({
+        slug: z.string(),
+        title: z.string(),
+        status: z.string(),
+        featured: z.boolean(),
+        order: z.number(),
+        showOnHome: z.boolean(),
+        period: z.string(),
+        summary: z.string(),
+        highlight: z.string(),
+        role: z.string(),
+        teamSize: z.string(),
+        projectType: z.string(),
+        impact: z.string(),
+        techStack: z.array(z.string()),
+        image: z.string(),
+        githubUrl: z.string().optional().default(""),
+        demoUrl: z.string().optional().default(""),
+        dates: z.string(),
+        active: z.boolean(),
+        description: z.string(),
+        technologies: z.array(z.string()),
+        links: z.array(z.object({
+            type: z.string(),
+            href: z.string(),
+        })).default([]),
+        video: z.string().optional().default(""),
+        content: z.string(),
+    }),
+    transform: async (document, context) => {
+        const mdx = await compileMDX(context, document, {
+            remarkPlugins: [remarkGfm, remarkCodeMeta],
+        });
+        return {
+            ...document,
+            href: `/projects/${document.slug}`,
+            mdx,
+        };
+    },
 });
 
+export default defineConfig({
+    collections: [posts, projects],
+});

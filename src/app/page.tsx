@@ -2,6 +2,7 @@ import BlurFade from "@/components/magicui/blur-fade";
 import { ProjectCard } from "@/components/project-card";
 import { Button } from "@/components/ui/button";
 import { DATA } from "@/data/resume";
+import { allProjects } from "content-collections";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
@@ -33,6 +34,10 @@ function SectionTitle({
 }
 
 export default function Page() {
+  const projects = [...allProjects]
+    .filter((project) => project.showOnHome)
+    .sort((a, b) => a.order - b.order);
+
   return (
     <main className="relative mx-auto flex w-full max-w-6xl flex-col gap-16 px-5 pb-32 pt-14 sm:gap-20 sm:px-6 lg:gap-24 lg:px-8">
       <section
@@ -110,7 +115,7 @@ export default function Page() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 min-[960px]:grid-cols-3">
-              {DATA.projects.map((project) => (
+              {projects.map((project) => (
                 <ProjectCard
                   key={project.slug}
                   title={project.title}

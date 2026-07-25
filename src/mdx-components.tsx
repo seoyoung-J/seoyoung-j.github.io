@@ -1,13 +1,29 @@
 import { CodeBlock } from "@/components/mdx/code-block";
 import { MediaContainer } from "@/components/mdx/media-container";
+import { CaseSection, Paragraphs } from "@/components/project-detail/case-section";
+import { DecisionBlock } from "@/components/project-detail/decision-block";
+import { ExperimentTable } from "@/components/project-detail/experiment-table";
+import { MetricsBlock } from "@/components/project-detail/metrics-block";
+import { SimpleArrowList } from "@/components/project-detail/simple-arrow-list";
 import type { ComponentProps } from "react";
 
 type CodeProps = ComponentProps<"code"> & {
   "data-language"?: string;
 };
 
+function ProjectBody(props: ComponentProps<"div">) {
+  return <div {...props} />;
+}
+
 export const mdxComponents = {
+  CaseSection,
+  DecisionBlock,
+  ExperimentTable,
   MediaContainer,
+  MetricsBlock,
+  Paragraphs,
+  ProjectBody,
+  SimpleArrowList,
   pre: (props: ComponentProps<"pre">) => <CodeBlock {...props} />,
   hr: (props: ComponentProps<"hr">) => (
     <div className="my-10 flex w-full items-center" {...props}>
@@ -46,4 +62,3 @@ export const mdxComponents = {
     );
   },
 } as const;
-
