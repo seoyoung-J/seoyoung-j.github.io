@@ -1,9 +1,8 @@
 import { CodeBlock } from "@/components/mdx/code-block";
 import { MediaContainer } from "@/components/mdx/media-container";
 import { CaseSection, Paragraphs } from "@/components/project-detail/case-section";
-import { DecisionBlock } from "@/components/project-detail/decision-block";
-import { ExperimentTable } from "@/components/project-detail/experiment-table";
-import { MetricsBlock } from "@/components/project-detail/metrics-block";
+import { DemoVideo } from "@/components/project-detail/demo-video";
+import { ProjectFigure } from "@/components/project-detail/project-figure";
 import { SimpleArrowList } from "@/components/project-detail/simple-arrow-list";
 import type { ComponentProps } from "react";
 
@@ -17,11 +16,10 @@ function ProjectBody(props: ComponentProps<"div">) {
 
 export const mdxComponents = {
   CaseSection,
-  DecisionBlock,
-  ExperimentTable,
+  DemoVideo,
   MediaContainer,
-  MetricsBlock,
   Paragraphs,
+  ProjectFigure,
   ProjectBody,
   SimpleArrowList,
   pre: (props: ComponentProps<"pre">) => <CodeBlock {...props} />,
@@ -39,15 +37,13 @@ export const mdxComponents = {
     </div>
   ),
   table: (props: ComponentProps<"table">) => (
-    <div className="my-6 border border-border rounded-xl overflow-hidden">
-      <div className="w-full overflow-x-auto">
-        <table
-          className="m-0! w-full min-w-full border-separate border-spacing-0"
-          {...props}
-        />
-      </div>
-    </div>
-  ),
+  <div className="my-6 w-full max-w-4xl overflow-x-auto rounded-xl border border-border">
+    <table
+      className="m-0! w-full table-auto border-separate border-spacing-0"
+      {...props}
+    />
+  </div>
+),
   code: ({ children, ...props }: CodeProps) => {
     if (props["data-language"]) {
       return <code {...props}>{children}</code>;

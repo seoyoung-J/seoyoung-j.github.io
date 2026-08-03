@@ -22,7 +22,7 @@ export function Paragraphs({ items }: { items?: string[] }) {
   }
 
   return (
-    <div className="space-y-3 text-sm leading-7 text-muted-foreground sm:text-base">
+    <div className="space-y-3 text-sm leading-7 text-foreground/70 sm:text-base">
       {items.map((item) => (
         <p key={item}>{item}</p>
       ))}

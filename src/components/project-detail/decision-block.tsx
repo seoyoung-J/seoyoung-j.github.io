@@ -1,4 +1,8 @@
-import type { ProjectDecision } from "@/data/projects";
+type ProjectDecision = {
+  title: string;
+  reasoning: string[];
+  alternatives: string[];
+};
 
 export function DecisionBlock({ decision }: { decision: ProjectDecision }) {
   return (
@@ -6,7 +10,7 @@ export function DecisionBlock({ decision }: { decision: ProjectDecision }) {
       <h3 className="text-base font-semibold text-foreground">
         {decision.title}
       </h3>
-      <div className="mt-4 space-y-4 text-sm leading-7 text-muted-foreground">
+      <div className="mt-4 space-y-4 text-sm leading-7 text-foreground/70">
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             Reasoning

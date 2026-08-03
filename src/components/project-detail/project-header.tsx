@@ -1,37 +1,54 @@
-import type { Project } from "@/data/projects";
-import { ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { ProjectDetail } from "@/data/projects";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
 
-export function ProjectHeader({ project }: { project: Project }) {
+export function ProjectHeader({ project }: { project: ProjectDetail }) {
   const metadata = [
-    project.role,
-    project.period,
-    project.teamSize,
+    project.dates,
     project.projectType,
-  ].filter(Boolean);
+  ].filter((item): item is string => Boolean(item));
+
+  const links = [
+    project.githubUrl
+      ? {
+          label: "View GitHub",
+          href: project.githubUrl,
+          isPrimary: true,
+        }
+      : null,
+    project.demoUrl
+      ? {
+          label: "Demo",
+          href: project.demoUrl,
+        }
+      : null,
+    project.presentationUrl
+      ? {
+          label: "발표 자료",
+          href: project.presentationUrl,
+        }
+      : null,
+  ].filter(
+    (link): link is { label: string; href: string; isPrimary?: boolean } =>
+      Boolean(link)
+  );
 
   return (
     <header className="border-b border-border pb-8">
       <Link
         href="/#projects"
-        className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-[#5F73C6] dark:hover:text-[#8998D8]"
+        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/60 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:bg-background hover:text-foreground"
       >
         <ArrowLeft
-          className="size-4 transition-transform group-hover:-translate-x-0.5"
+          className="size-3.5"
           aria-hidden
         />
         Back to projects
       </Link>
-      <div className="mt-8">
-        <span className="rounded-full bg-[#5F73C6]/10 px-3 py-1 text-xs font-medium text-[#5F73C6] dark:bg-[#8998D8]/12 dark:text-[#8998D8]">
-          {project.status}
-        </span>
-      </div>
-      <h1 className="mt-5 text-balance text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
-        {project.title}
-      </h1>
-      <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-7 text-zinc-500 dark:text-zinc-400 sm:text-base">
+      <div className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-6 text-muted-foreground">
         {metadata.map((item, index) => (
           <Fragment key={`${item}-${index}`}>
             {index > 0 && (
@@ -43,9 +60,50 @@ export function ProjectHeader({ project }: { project: Project }) {
           </Fragment>
         ))}
       </div>
-      <p className="mt-6 text-pretty text-base leading-8 text-muted-foreground sm:text-lg">
+      <h1 className="mt-4 break-keep text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50 sm:text-4xl">
+        {project.title}
+      </h1>
+      <p className="mt-6 text-pretty text-base leading-8 text-foreground/70 sm:text-lg">
         {project.summary}
       </p>
+      {project.technologies.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-1.5">
+          {project.technologies.map((technology) => (
+            <Badge
+              key={technology}
+              variant="outline"
+              className="rounded-full border-border bg-transparent px-2.5 py-1 text-[13px] font-medium text-muted-foreground"
+            >
+              {technology}
+            </Badge>
+          ))}
+        </div>
+      )}
+      {links.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-2">
+          {links.map((link) => (
+            <Button
+              key={link.href}
+              asChild
+              variant={link.isPrimary ? "ghost" : "outline"}
+              size="sm"
+              className={
+                link.isPrimary
+                  ? "h-11 rounded-full bg-foreground px-6 text-sm font-medium text-background hover:bg-foreground/85 hover:text-background"
+                  : undefined
+              }
+            >
+              <a href={link.href} target="_blank" rel="noopener noreferrer">
+                {link.label}
+                <ArrowUpRight
+                  className={link.isPrimary ? "size-4" : "size-3.5"}
+                  aria-hidden
+                />
+              </a>
+            </Button>
+          ))}
+        </div>
+      )}
     </header>
   );
 }

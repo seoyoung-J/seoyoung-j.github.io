@@ -1,4 +1,9 @@
-import type { ProjectExperiment } from "@/data/projects";
+type ProjectExperiment = {
+  name: string;
+  condition: string;
+  result: string;
+  decision: string;
+};
 
 export function ExperimentTable({
   experiments,
@@ -26,13 +31,13 @@ export function ExperimentTable({
           {experiments.map((experiment) => (
             <tr key={experiment.name} className="border-b border-border">
               <td className="px-3 py-3 font-medium">{experiment.name}</td>
-              <td className="px-3 py-3 text-muted-foreground">
+              <td className="px-3 py-3 text-foreground/70">
                 {experiment.condition}
               </td>
-              <td className="px-3 py-3 text-right tabular-nums text-muted-foreground">
+              <td className="px-3 py-3 text-right tabular-nums text-foreground/70">
                 {experiment.result}
               </td>
-              <td className="px-3 py-3 text-muted-foreground">
+              <td className="px-3 py-3 text-foreground/70">
                 {experiment.decision}
               </td>
             </tr>

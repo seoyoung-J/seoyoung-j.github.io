@@ -1,4 +1,7 @@
-import type { ProjectMetric } from "@/data/projects";
+type ProjectMetric = {
+  label: string;
+  value: string;
+};
 
 export function MetricsBlock({ metrics }: { metrics?: ProjectMetric[] }) {
   if (!metrics || metrics.length === 0) {
@@ -10,11 +13,7 @@ export function MetricsBlock({ metrics }: { metrics?: ProjectMetric[] }) {
       {metrics.map((metric, index) => (
         <div
           key={metric.label}
-          className={
-            index === 0
-              ? "p-5"
-              : "border-t border-border p-5"
-          }
+          className={index === 0 ? "p-5" : "border-t border-border p-5"}
         >
           <p className="text-lg font-semibold text-foreground">
             {metric.value}

@@ -3,9 +3,49 @@ import { DecisionBlock } from "@/components/project-detail/decision-block";
 import { ExperimentTable } from "@/components/project-detail/experiment-table";
 import { MetricsBlock } from "@/components/project-detail/metrics-block";
 import { SimpleArrowList } from "@/components/project-detail/simple-arrow-list";
-import type { Project } from "@/data/projects";
 
-export function ProjectCaseStudy({ project }: { project: Project }) {
+type LegacyProjectCaseStudy = {
+  overview?: string[];
+  problem?: string[];
+  constraints?: string[];
+  approach?: string[];
+  decisions?: {
+    title: string;
+    reasoning: string[];
+    alternatives: string[];
+  }[];
+  systemFlow?: string[];
+  modeling?: {
+    description?: string[];
+    experiments?: {
+      name: string;
+      condition: string;
+      result: string;
+      decision: string;
+    }[];
+  };
+  serviceIntegration?: string[];
+  techStack?: string[];
+  metrics?: {
+    label: string;
+    value: string;
+  }[];
+  resultDescription?: string[];
+  troubleshooting?: {
+    title: string;
+    problem: string;
+    solution: string;
+    result: string;
+  }[];
+  learnings?: string[];
+  additionalContext?: string[];
+};
+
+type LegacyProject = {
+  caseStudy?: LegacyProjectCaseStudy;
+};
+
+export function ProjectCaseStudy({ project }: { project: LegacyProject }) {
   const caseStudy = project.caseStudy;
 
   if (!caseStudy) {
@@ -74,15 +114,15 @@ export function ProjectCaseStudy({ project }: { project: Project }) {
                 <h3 className="text-base font-semibold text-foreground">
                   {item.title}
                 </h3>
-                <p className="text-sm leading-7 text-muted-foreground">
+                <p className="text-sm leading-7 text-foreground/70">
                   <span className="font-semibold text-foreground">Problem</span>{" "}
                   {item.problem}
                 </p>
-                <p className="text-sm leading-7 text-muted-foreground">
+                <p className="text-sm leading-7 text-foreground/70">
                   <span className="font-semibold text-foreground">Solution</span>{" "}
                   {item.solution}
                 </p>
-                <p className="text-sm leading-7 text-muted-foreground">
+                <p className="text-sm leading-7 text-foreground/70">
                   <span className="font-semibold text-foreground">Result</span>{" "}
                   {item.result}
                 </p>

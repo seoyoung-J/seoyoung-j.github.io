@@ -1,40 +1,43 @@
-import type { Project } from "@/data/projects";
+import type { ProjectDetail } from "@/data/projects";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export function ProjectNavigation({
   previous,
   next,
 }: {
-  previous?: Project;
-  next?: Project;
+  previous?: ProjectDetail;
+  next?: ProjectDetail;
 }) {
   return (
     <nav className="border-t border-border pt-6">
-      <div className="flex flex-col justify-between gap-6 sm:flex-row">
+      <div className="grid gap-4 sm:grid-cols-2">
         {previous && (
           <Link
             href={`/projects/${previous.slug}`}
-            className="group max-w-sm text-left"
+            className="flex min-h-24 flex-1 flex-col justify-between rounded-lg border border-border/70 bg-background p-4 text-left transition-colors hover:border-foreground/60"
           >
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <ArrowLeft className="size-3.5" aria-hidden />
               Previous
-            </p>
-            <p className="mt-1 text-sm font-medium transition-colors group-hover:text-[#5F73C6] dark:group-hover:text-[#8998D8]">
+            </span>
+            <span className="mt-4 text-sm font-medium leading-6 text-foreground break-words">
               {previous.title}
-            </p>
+            </span>
           </Link>
         )}
         {next && (
           <Link
             href={`/projects/${next.slug}`}
-            className="group max-w-sm text-left sm:text-right"
+            className="flex min-h-24 flex-1 flex-col justify-between rounded-lg border border-border/70 bg-background p-4 text-left transition-colors hover:border-foreground/60 sm:text-right"
           >
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground sm:justify-end">
               Next
-            </p>
-            <p className="mt-1 text-sm font-medium transition-colors group-hover:text-[#5F73C6] dark:group-hover:text-[#8998D8]">
+              <ArrowRight className="size-3.5" aria-hidden />
+            </span>
+            <span className="mt-4 text-sm font-medium leading-6 text-foreground break-words">
               {next.title}
-            </p>
+            </span>
           </Link>
         )}
       </div>
