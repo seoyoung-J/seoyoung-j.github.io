@@ -3,21 +3,16 @@
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 import { useState } from "react";
 
 interface Props {
   title: string;
-  period?: string;
-  summary?: string;
-  highlight?: string;
-  techStack?: readonly string[];
   image?: string;
   className?: string;
   href?: string;
-  link?: string;
-  video?: string;
   links?: readonly {
     icon: React.ReactNode;
     type: string;
@@ -33,7 +28,7 @@ function ProjectImage({ src, alt }: { src?: string; alt: string }) {
 
   if (!src || imageError) {
     return (
-      <div className="flex aspect-video w-full items-center justify-center bg-muted text-xs text-muted-foreground">
+      <div className="flex h-44 w-full items-center justify-center bg-muted text-sm text-muted-foreground sm:h-48">
         Preview pending
       </div>
     );
@@ -43,7 +38,7 @@ function ProjectImage({ src, alt }: { src?: string; alt: string }) {
     <img
       src={src}
       alt={alt}
-      className="aspect-video w-full object-cover"
+      className="h-44 w-full object-cover sm:h-48"
       onError={() => setImageError(true)}
     />
   );
@@ -51,24 +46,17 @@ function ProjectImage({ src, alt }: { src?: string; alt: string }) {
 
 export function ProjectCard({
   title,
-  period,
-  summary,
-  highlight,
-  techStack,
   image,
   className,
   href,
-  video,
   links,
   dates,
   description,
   tags,
 }: Props) {
-  const displayPeriod = period ?? dates;
-  const displaySummary = summary ?? description;
-  const displayTechStack = techStack ?? tags ?? [];
+  const displayTechStack = tags ?? [];
   const cardClassName = cn(
-    "flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-[#5F73C6]/50 dark:hover:border-[#8998D8]/45",
+    "relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-background transition-colors hover:border-foreground/60",
     href && "cursor-pointer",
     className
   );
@@ -76,67 +64,63 @@ export function ProjectCard({
   const content = (
     <>
       <div className="relative shrink-0">
-        {video ? (
-          <video
-            src={video}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="aspect-video w-full object-cover"
-          />
-        ) : (
-          <ProjectImage src={image} alt={title} />
-        )}
+        <ProjectImage src={image} alt={title} />
         {links && links.length > 0 && (
-          <div className="absolute right-2 top-2 flex flex-wrap gap-2">
+          <div className="absolute right-2 top-2 z-20 flex flex-wrap gap-1.5">
             {links.map((link, idx) => (
-              <Link
+              <a
                 href={link.href}
                 key={idx}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Badge
-                  className="flex items-center gap-1.5 bg-black text-xs text-white hover:bg-black/90"
-                  variant="default"
+                  className="flex h-6 items-center gap-1 border-border/70 bg-background/90 px-2 text-[11px] font-medium text-foreground/80 backdrop-blur hover:bg-background"
+                  variant="outline"
                 >
                   {link.icon}
                   {link.type}
                 </Badge>
-              </Link>
+              </a>
             ))}
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        <h3 className="line-clamp-2 min-h-12 text-base font-semibold leading-6">
-          {title}
-        </h3>
-        {displayPeriod && (
-          <time className="text-xs text-muted-foreground">{displayPeriod}</time>
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <h3 className="flex-1 text-base font-semibold leading-6 text-foreground">
+            {title}
+          </h3>
+          {href && (
+            <ArrowUpRight
+              className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+              aria-hidden
+            />
+          )}
+        </div>
+        {dates && (
+          <time className="mt-2 text-sm leading-5 text-muted-foreground">
+            {dates}
+          </time>
         )}
-        {displaySummary && (
-          <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
-            {displaySummary}
-          </p>
-        )}
-        {highlight && (
-          <p className="text-sm font-medium leading-6 text-foreground/85">
-            {highlight}
+        {description && (
+          <p className="mt-4 text-sm leading-6 text-foreground/70">
+            {description}
           </p>
         )}
         {displayTechStack.length > 0 && (
-          <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
-            {displayTechStack.slice(0, 7).map((technology) => (
-              <Badge
-                key={technology}
-                className="h-6 rounded-full border-border px-2 text-[11px] font-medium text-muted-foreground"
-                variant="outline"
-              >
-                {technology}
-              </Badge>
-            ))}
+          <div className="mt-auto pt-7">
+            <div className="flex min-h-[84px] flex-wrap content-start gap-1.5">
+              {displayTechStack.slice(0, 7).map((technology) => (
+                <Badge
+                  key={technology}
+                  className="h-6 w-fit rounded-full border-border/60 bg-background px-2 text-[11px] font-medium text-foreground hover:bg-background"
+                  variant="outline"
+                >
+                  {technology}
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -145,9 +129,14 @@ export function ProjectCard({
 
   if (href) {
     return (
-      <Link href={href} className={cardClassName}>
+      <article className={cn("group", cardClassName)}>
         {content}
-      </Link>
+        <Link
+          href={href}
+          className="absolute inset-0 z-10"
+          aria-label={`${title} project detail`}
+        />
+      </article>
     );
   }
 

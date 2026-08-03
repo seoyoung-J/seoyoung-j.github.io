@@ -1,5 +1,5 @@
 import { Icons } from "@/components/icons";
-import { FolderKanban, HomeIcon, UserRound } from "lucide-react";
+import { FolderKanban, HomeIcon } from "lucide-react";
 import type React from "react";
 
 type WorkItem = {
@@ -41,46 +41,69 @@ type HackathonItem = {
 
 export const DATA = {
   name: "Seoyoung Jo",
-  initials: "JS",
+  initials: "SJ",
   url: "https://github.com/seoyoung-J",
   location: "Seoul, Korea",
   locationLink: "https://www.google.com/maps/place/seoul",
   description:
     "모델을 실험하고 서비스 흐름까지 구현하는 AI 엔지니어 조서영입니다.",
   avatarUrl: "",
+
   navbar: [
-    { href: "/", icon: HomeIcon, label: "Home", dock: true },
-    { href: "#about", icon: UserRound, label: "About", dock: true },
-    { href: "#projects", icon: FolderKanban, label: "Projects", dock: true },
-    { href: "#skills", icon: UserRound, label: "Skills", dock: false },
+    {
+      href: "/",
+      icon: HomeIcon,
+      label: "Home",
+      dock: true,
+    },
+    {
+      href: "/#projects",
+      icon: FolderKanban,
+      label: "Projects",
+      dock: true,
+    },
   ],
+
   about:
-    "데이터 특성에 맞는 모델을 실험하고, 운영 환경을 고려해 실제 서비스에 적용하는 AI 엔지니어를 목표로 경험을 쌓아왔습니다.컴퓨터 비전 기반 객체 탐지와 이미지 이상 탐지, 제조 공정 데이터 기반 예측 프로젝트를 수행하며 실험 조건 설정, 성능 비교와 오류 분석 과정을 경험했습니다. 모델 학습에 그치지 않고 FastAPI, ONNX Runtime, 비동기 분석 구조와 결과 조회 기능을 통해 모델이 서비스 안에서 사용되는 전체 흐름을 구현해 왔습니다.",
+    "데이터 특성에 맞는 모델을 실험하고, 운영 환경을 고려해 실제 서비스에 연결하는 AI 엔지니어를 목표로 경험을 쌓아왔습니다. 객체 탐지·인스턴스 세그멘테이션·이미지 이상 탐지 프로젝트에서 실험 조건을 설계하고 성능과 오류 사례를 분석했습니다. 또한 ONNX Runtime, FastAPI, Spring Boot와 비동기 분석 구조를 활용해 이미지 등록부터 추론, 결과 저장·조회까지 연결했습니다.",
+
   skills: [
     {
-      title: "AI / ML",
-      skills: ["Python", "PyTorch", "TensorFlow/Keras", "scikit-learn"],
+      title: "ML / DL",
+      skills: [
+        "Python",
+        "PyTorch",
+        "Scikit-Learn",
+        "TensorFlow",
+      ],
     },
     {
       title: "Computer Vision",
       skills: [
         "YOLO",
-        "OpenCV",
-        "Anomalib",
-        "Object Detection",
-        "Instance Segmentation",
+        "Image Segmentation",
         "Anomaly Detection",
+        "Anomalib",
+        "OpenCV",
+        "ONNX Runtime",
       ],
     },
     {
-      title: "Backend & Infrastructure",
-      skills: ["Spring Boot", "PostgreSQL", "Docker", "AWS"],
+      title: "Backend / Infra",
+      skills: [
+        "FastAPI",
+        "Spring Boot",
+        "PostgreSQL",
+        "Docker",
+        "AWS",
+      ],
     },
     {
-      title: "RAG & AI Serving",
-      skills: ["LangGraph", "FAISS", "FastAPI", "ONNX Runtime"],
+      title: "RAG / LLM",
+      skills: ["RAG", "LangGraph", "FAISS"],
     },
   ],
+
   contact: {
     email: "",
     tel: "",
@@ -93,6 +116,7 @@ export const DATA = {
       },
     },
   },
+
   work: [] as WorkItem[],
   education: [] as EducationItem[],
   hackathons: [] as HackathonItem[],
