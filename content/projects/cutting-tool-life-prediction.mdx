@@ -24,12 +24,54 @@ CNC 밀링 공정의 진동·전류 센서 통계 피처와 공정 메타데이�
 
 동일 공구 데이터가 학습과 검증에 함께 포함되지 않도록 `TollIndex` 기준 GroupKFold를 적용했습니다. 타깃과 입력 변수 조합, 7개 회귀 모델, 튜닝 방법과 피처 구성을 비교해 ExtraTreesRegressor와 Top-30 피처를 최종 선정했습니다.
 
-## 모델링 및 검증 흐름
+## 주요 성과
 
-1. 진동·전류 센서 통계 피처와 공정 메타데이터를 정리하고 희소 공구 그룹을 제외했습니다.
-2. `CycleToFailure`와 `CycleToFailureNormalized`, `NumberOfCycle` 포함 여부를 비교했습니다.
-3. 동일한 GroupKFold 조건에서 7개 회귀 모델을 비교하고 상위 3개 모델을 튜닝했습니다.
-4. 최종 ExtraTreesRegressor의 피처 중요도를 기준으로 Top-N 구성을 비교해 Top-30 피처를 선정했습니다.
+### 1. **공구 단위 일반화 검증**
+
+동일 공구 데이터가 학습과 검증에 함께 포함되지 않도록 `TollIndex` 기준 GroupKFold를 적용하고, 학습에 포함되지 않은 공구에 대한 성능을 평가했습니다.
+
+### 2. **회귀 모델 비교 및 최종 모델 선정**
+
+7개 회귀 모델을 동일한 GroupKFold 조건에서 비교하고 상위 3개 모델을 튜닝해 **ExtraTreesRegressor를 최종 모델로 선정했습니다.**
+
+### 3. **피처 최적화를 통한 성능 개선**
+
+전체 피처 기준 **평균 MAE 0.1014, RMSE 0.1228, R² 0.7941**에서 Top-30 피처 적용 후 **MAE 0.0943, RMSE 0.1153, R² 0.8152**로 개선했습니다.
+
+| 피처 구성 | MAE | RMSE | R² | 판단 |
+| :---: | :---: | :---: | :---: | :---: |
+| 전체 피처 | 0.1014 | 0.1228 | 0.7941 | 비교 기준 |
+| Top-30 | **0.0943** | **0.1153** | **0.8152** | 최종 선정 |
+| 상관관계 기반 16개 | 0.0979 | 0.1169 | 0.8112 | 미채택 |
+
+<div className="not-prose mt-16 mb-12 grid gap-8 md:grid-cols-2 md:items-start">
+  <div className="px-2 pt-3 md:px-4 md:pt-6">
+    <div className="text-xl font-semibold text-foreground">
+      최종 모델 예측 결과
+    </div>
+
+    <div className="mt-5 text-base leading-8 text-muted-foreground">
+      Top-30 피처를 적용한 ExtraTreesRegressor의 13-fold 교차검증 결과입니다. 예측값이 전반적으로 이상적인 예측선을 따라 분포해 실제 잔여수명의 변화 추세를 학습한 것을 확인했습니다.
+    </div>
+
+    <div className="mt-4 text-base leading-8 text-muted-foreground">
+      다만 일부 구간에서는 실제값보다 낮게 예측하는 패턴이 나타나 공구별 데이터 특성에 따라 일반화 성능에 차이가 있음을 확인했습니다.
+    </div>
+  </div>
+
+  <div className="m-0">
+    <img
+      src="/projects/cutting-tool-life-prediction/actual_vs_predicted_cv13_top30_rechecked.png"
+      alt="Top-30 피처를 적용한 최종 ExtraTrees 모델의 실제값과 예측값 비교"
+      className="w-full rounded-xl"
+      loading="lazy"
+    />
+
+    <div className="mt-3 text-center text-sm text-muted-foreground">
+      Top-30 피처 기반 13-fold 교차검증 Actual vs Predicted
+    </div>
+  </div>
+</div>
 
 ## 트러블슈팅
 
@@ -43,39 +85,39 @@ CNC 밀링 공정의 진동·전류 센서 통계 피처와 공정 메타데이�
 
 ##### **1. 공구 단위 검증 구조 적용**
 
-- `TollIndex` 기준 그룹 분포를 확인하고 표본 수가 5개 미만인 희소 그룹 제외
+- `TollIndex` 기준 그룹 분포를 확인해 표본 수가 5개 미만인 희소 그룹 제외
 - 최종 13개 공구 그룹을 기준으로 GroupKFold 학습·검증 구조 적용
 - 동일 공구 데이터가 학습과 검증에 함께 포함되지 않도록 분할
 
 ##### **2. 타깃과 입력 변수 조합 비교**
 
 - 타깃 조합 비교를 위한 기준 모델로 RandomForestRegressor 사용
-- `CycleToFailure`와 `CycleToFailureNormalized` 비교
+- `CycleToFailure`와 `CycleToFailureNormalized` 타깃 비교
 - 각 타깃에서 `NumberOfCycle` 포함 여부에 따른 4개 조합 평가
 
 #### **결과**
 
-`CycleToFailureNormalized`를 타깃으로 사용하고 `NumberOfCycle`을 입력 변수에 포함한 조합에서 **평균 MAE 0.1249, RMSE 0.1557, R² 0.6543**을 기록했습니다. 해당 조합을 이후 7개 회귀 모델 비교와 튜닝의 공통 입력 구성으로 적용했습니다.
+`CycleToFailureNormalized`를 타깃으로 사용하고 `NumberOfCycle`을 입력 변수에 포함한 조합에서 **평균 MAE 0.1249, RMSE 0.1557, R² 0.6543**을 기록했습니다. 이는 타깃과 입력 변수 조합을 선정하기 위한 중간 실험 결과이며, 해당 조합을 이후 7개 회귀 모델 비교와 튜닝에 동일하게 적용했습니다.
 
 ### **02. Top-30 피처 선정으로 ExtraTrees 평균 R² 0.7941 → 0.8152 향상**
 
 #### **문제 상황**
 
-입력 데이터에는 진동 통계 피처 48개와 전류 통계 피처 72개가 포함돼 있었으며, 일부 피처 사이에는 높은 상관관계가 존재했습니다. 중복 정보를 줄이면서도 잔여수명 예측에 필요한 정보를 유지할 수 있는 피처 구성을 선정해야 했습니다.
+입력 데이터에는 진동 통계 피처 48개와 전류 통계 피처 72개가 포함돼 있었으며, 일부 피처 사이에는 높은 상관관계가 존재했습니다. 중복된 정보를 줄이면서도 잔여수명 예측에 필요한 정보를 유지할 수 있는 피처 구성을 선정해야 했습니다.
 
 #### **해결 과정**
 
 ##### **1. 피처 중요도 기반 Top-N 비교**
 
-- ExtraTreesRegressor의 피처 중요도를 기준으로 Top-10, Top-20, Top-30 구성 생성
-- 전체 피처를 포함한 각 구성을 동일한 GroupKFold 조건에서 평가
+- ExtraTreesRegressor의 피처 중요도를 기준으로 Top-10, Top-20, Top-30 피처 구성 생성
+- 전체 피처를 포함한 각 구성을 동일한 GroupKFold 조건에서 비교
 - 평균 R²가 가장 높은 Top-30 구성을 최종 피처 후보로 선정
 
 ##### **2. 상관관계 기반 피처 축소 검증**
 
 - Top-30 피처 중 상관계수 절댓값이 0.9 이상인 피처 그룹 확인
 - 각 그룹에서 중요도가 가장 높은 대표 피처만 유지한 16개 피처 구성 생성
-- Top-30과 16개 축소 구성의 MAE, RMSE, R² 비교
+- Top-30 전체 구성과 16개 축소 구성의 MAE, RMSE, R² 비교
 
 #### **추가 실험 및 판단**
 
@@ -83,42 +125,7 @@ CNC 밀링 공정의 진동·전류 센서 통계 피처와 공정 메타데이�
 
 #### **결과**
 
-전체 피처를 사용한 ExtraTreesRegressor는 **평균 MAE 0.1014, RMSE 0.1228, R² 0.7941**을 기록했습니다. Top-30 피처 적용 후 **MAE 0.0943, RMSE 0.1153, R² 0.8152**로 모든 평가 지표가 개선됐습니다.
-
-상관관계 기준으로 16개까지 축소한 구성보다 예측 성능이 높은 **Top-30 피처 구성**을 최종 선택했습니다.
-
-| 피처 구성 | MAE | RMSE | R² | 판단 |
-| :---: | :---: | :---: | :---: | :---: |
-| 전체 피처 | 0.1014 | 0.1228 | 0.7941 | 비교 기준 |
-| Top-30 | **0.0943** | **0.1153** | **0.8152** | 최종 선정 |
-| 상관관계 기반 16개 | 0.0979 | 0.1169 | 0.8112 | 미채택 |
-
-<div className="not-prose mx-auto mt-10 max-w-[620px]">
-  <img
-    src="/projects/cutting-tool-life-prediction/actual_vs_predicted_cv13_top30_rechecked.png"
-    alt="Top-30 피처를 적용한 최종 ExtraTrees 모델의 실제값과 예측값 비교"
-    className="w-full"
-    loading="lazy"
-  />
-
-  <div className="mt-3 text-center text-sm text-muted-foreground">
-    Top-30 피처 기반 13-fold 교차검증 Actual vs Predicted
-  </div>
-</div>
-
-## 주요 성과
-
-### 1. **공구 단위 일반화 검증**
-
-`TollIndex` 기준 GroupKFold를 적용해 동일 공구 데이터가 학습과 검증에 함께 포함되는 것을 방지하고, 학습에 포함되지 않은 공구의 예측 성능을 평가했습니다.
-
-### 2. **회귀 모델 비교 및 최종 모델 선정**
-
-7개 회귀 모델을 동일한 검증 조건에서 비교하고 상위 3개 모델을 튜닝해 **ExtraTreesRegressor를 최종 모델로 선정했습니다.**
-
-### 3. **피처 최적화를 통한 성능 개선**
-
-피처 중요도 기반 Top-30 구성을 적용해 ExtraTreesRegressor의 **R²를 0.7941에서 0.8152로 높였으며, MAE와 RMSE도 함께 개선했습니다.**
+전체 피처를 사용한 ExtraTreesRegressor의 평균 성능은 **MAE 0.1014, RMSE 0.1228, R² 0.7941**이었습니다. Top-30 피처 적용 후 **MAE 0.0943, RMSE 0.1153, R² 0.8152**를 기록해 모든 평가 지표가 개선됐으며, 16개 축소 구성보다 성능이 높은 **Top-30 전체 구성**을 최종 선택했습니다.
 
 ## 한계 및 개선 방향
 

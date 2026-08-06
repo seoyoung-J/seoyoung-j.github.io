@@ -47,7 +47,7 @@ export default function Page() {
         <div className="max-w-3xl">
           <BlurFade delay={BLUR_FADE_DELAY}>
             <h1 className="max-w-3xl text-balance text-[clamp(2.5rem,7vw,5.5rem)] font-bold leading-[0.98] tracking-tight text-zinc-900 dark:text-zinc-50">
-              SeoYoung Jo
+              Seoyoung Jo
             </h1>
           </BlurFade>
 

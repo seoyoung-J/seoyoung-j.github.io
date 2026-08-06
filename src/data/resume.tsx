@@ -64,9 +64,15 @@ export const DATA = {
     },
   ],
 
-  about:
-    "데이터 특성에 맞는 모델을 실험하고, 운영 환경을 고려해 실제 서비스에 연결하는 AI 엔지니어를 목표로 경험을 쌓아왔습니다. 객체 탐지·인스턴스 세그멘테이션·이미지 이상 탐지 프로젝트에서 실험 조건을 설계하고 성능과 오류 사례를 분석했습니다. 또한 ONNX Runtime, FastAPI, Spring Boot와 비동기 분석 구조를 활용해 이미지 등록부터 추론, 결과 저장·조회까지 연결했습니다.",
-
+  about: (
+    <>
+      데이터 특성에 맞는 모델을 실험하고, 운영 환경을 고려해 실제 서비스에 적용하는 경험을 쌓았습니다. 객체 탐지·인스턴스 세그멘테이션·이상 탐지 프로젝트를 수행하며 모델을 비교하고 파라미터를 최적화했습니다.{" "}
+      <span className="font-semibold text-foreground underline decoration-1 underline-offset-4">
+        모델 실험을 통해 작은 결함 탐지 성능을 개선하고, 속도형 이상 탐지 모델의 GPU 메모리 사용량을 기존 구성 대비 약 63% 절감했습니다.
+      </span>{" "}
+      또한 탐지 결과를 반영한 RAG 파이프라인을 설계하고, 추론부터 결과 조회까지 이어지는 서비스 흐름을 구현했습니다.
+    </>
+  ),
   skills: [
     {
       title: "ML / DL",
@@ -105,7 +111,7 @@ export const DATA = {
   ],
 
   contact: {
-    email: "",
+    email: "syjo2510@gmail.com",
     tel: "",
     social: {
       GitHub: {
