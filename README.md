@@ -1,7 +1,5 @@
 # Portfolio
 
-## About
-
 AI 프로젝트의 모델 실험, 성능 개선, 추론 및 서비스 연동 경험을 정리한 개인 포트폴리오입니다.
 
 Computer Vision, Machine Learning, RAG 프로젝트의 주요 구현 내용과 실험 결과, 트러블슈팅을 확인할 수 있습니다.
