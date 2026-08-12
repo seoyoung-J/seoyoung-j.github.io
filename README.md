@@ -1,47 +1,58 @@
-<div align="center">
-<img alt="Portfolio" src="https://github.com/dillionverma/portfolio/assets/16860528/57ffca81-3f0a-4425-b31d-094f61725455" width="90%">
-</div>
+# Portfolio
 
-# Portfolio [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdillionverma%2Fportfolio)
+## About
 
-Built with next.js, [shadcn/ui](https://ui.shadcn.com/), and [magic ui](https://magicui.design/), deployed on Vercel.
+AI 프로젝트의 모델 실험, 성능 개선, 추론 및 서비스 연동 경험을 정리한 개인 포트폴리오입니다.
 
-# Features
+Computer Vision, Machine Learning, RAG 프로젝트의 주요 구현 내용과 실험 결과, 트러블슈팅을 확인할 수 있습니다.
 
-- Setup only takes a few minutes by editing the [single config file](./src/data/resume.tsx)
-- Built using Next.js 14, React, Typescript, Shadcn/UI, TailwindCSS, Framer Motion, Magic UI
-- Includes a blog
-- Responsive for different devices
-- Optimized for Next.js and Vercel
+## Projects
 
-# Getting Started Locally
+* RGB·열화상 기반 태양광 패널 관리 플랫폼
+* 산업 이미지 이상 탐지 및 설비 점검 가이드 플랫폼
+* 차량 손상 탐지 및 대응 가이드 시스템
+* CNC 밀링 공정 절삭 공구 잔여수명 예측
 
-1. Clone this repository to your local machine:
+## Built With
 
-   ```bash
-   git clone https://github.com/dillionverma/portfolio
-   ```
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* MDX
 
-2. Move to the cloned directory
+## Getting Started Locally
 
-   ```bash
-   cd portfolio
-   ```
+Clone the repository.
 
-3. Install dependencies:
+```bash
+git clone https://github.com/seoyoung-J/seoyoung-j.github.io.git
+cd seoyoung-j.github.io
+```
 
-   ```bash
-   pnpm install
-   ```
+Install dependencies.
 
-4. Start the local Server:
+```bash
+pnpm install
+```
 
-   ```bash
-   pnpm dev
-   ```
+Start the development server.
 
-5. Open the [Config file](./src/data/resume.tsx) and make changes
+```bash
+pnpm dev
+```
 
-# License
+## Deployment
 
-Licensed under the [MIT license](https://github.com/dillionverma/portfolio/blob/main/LICENSE.md).
+GitHub Pages를 통해 배포합니다.
+
+* Portfolio: https://seoyoung-j.github.io/
+* GitHub: https://github.com/seoyoung-J
+
+## Credits
+
+Based on the open-source portfolio template by [Dillion Verma](https://github.com/dillionverma/portfolio).
+
+## License
+
+Licensed under the MIT License.
