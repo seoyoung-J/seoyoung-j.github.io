@@ -46,6 +46,21 @@ const projects = defineCollection({
         demoVideo: z.string().optional().default(""),
         presentationUrl: z.string().optional().default(""),
         technologies: z.array(z.string()),
+        highlights: z
+            .array(
+                z.object({
+                    title: z.string(),
+                    items: z.array(z.string()),
+                })
+            )
+            .optional(),
+        resultImage: z
+            .object({
+                src: z.string(),
+                alt: z.string(),
+                caption: z.string().optional(),
+            })
+            .optional(),
         content: z.string(),
     }),
     transform: async (document, context) => {

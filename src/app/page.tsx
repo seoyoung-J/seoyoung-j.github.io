@@ -100,7 +100,7 @@ export default function Page() {
             <div>
               <SectionTitle number="01" title="About" />
 
-              <p className="w-full max-w-5xl whitespace-pre-line text-pretty text-sm leading-7 text-foreground/70 sm:text-base sm:leading-7">
+              <p className="w-full max-w-none whitespace-pre-line text-pretty text-sm leading-7 text-foreground/70 sm:text-base sm:leading-7">
                 {DATA.about}
               </p>
             </div>

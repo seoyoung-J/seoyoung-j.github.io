@@ -17,127 +17,134 @@ technologies:
   - "EfficientAD"
   - "WideResNet50"
   - "MobileNetV3"
+highlights:
+  - title: "속도형 이상 탐지 모델 선정"
+    items:
+      - "WideResNet50 + PatchCore layer2 선정"
+      - "Object PRO 0.88 · Texture PRO 0.85"
+  - title: "feature layer 및 Memory Bank 최적화"
+    items:
+      - "layer2 적용으로 GPU 메모리 63.2%·63.8% 절감"
+      - "저장 patch feature 수 50%·75% 축소"
+  - title: "Teacher output 기반 경량 모델 검토"
+    items:
+      - "mask loss 적용 시 학습 GPU 메모리 증가율 약 0.4%"
+      - "validation PRO 약 2.6% 향상"
 ---
 
 ## 프로젝트 개요
 
-제조 현장의 외관 검사는 작업자의 육안 판단에 의존해 검사 결과에 편차가 발생하거나 결함을 놓칠 가능성이 있습니다. 또한 결함 이미지와 라벨을 충분히 확보하기 어려워 모든 결함 유형을 사전에 학습하기 어렵습니다. 이에 **이미지 기반 검사 판정과 이상 위치 확인을 자동화하고, 문서 기반 설비 점검 가이드를 통해 작업자의 대응 판단을 지원하고자 했습니다.**
+제조 현장의 외관 검사는 작업자의 육안 판단에 따라 검사 결과에 편차가 발생하거나 결함을 놓칠 수 있으며, 결함 이미지와 라벨을 충분히 확보하기 어려워 모든 결함 유형을 사전에 학습하는 데 한계가 있습니다. 이에 **이미지 기반 검사 판정과 이상 위치 확인을 자동화하고, 문서 기반 설비 점검 가이드를 통해 작업자의 대응 판단을 지원하는 플랫폼**을 구현했습니다.
 
-형상과 부품 구조의 이상을 검사하는 Object 유형과 표면 및 패턴의 변화를 검사하는 Texture 유형을 구분하고, **빠른 1차 판정을 위한 속도형 모델과 정밀 분석을 위한 성능형 모델**을 적용했습니다. 각 모델은 정상 이미지의 특징을 기준으로 제조 이미지의 정상·불량·재검사를 판정하고, 이상 위치를 시각화합니다.
+형상과 부품 구조의 이상을 검사하는 Object 유형과 표면·패턴의 변화를 검사하는 Texture 유형을 구분하고, **빠른 1차 판정을 위한 속도형 모델과 정밀 분석을 위한 성능형 모델**을 적용했습니다. 각 모델은 정상 이미지의 특징을 기준으로 제조 이미지의 정상·불량·재검사를 판정하고 Heatmap으로 이상 위치를 시각화합니다.
 
-PatchCore는 정상 이미지의 대표 특징을 Memory Bank에 저장해 검사 기준으로 활용합니다. 신규 품목이 등록되면 선택한 모델 프로파일의 backbone과 feature layer 구성을 그대로 사용하고, 해당 품목의 정상 이미지로 별도의 Memory Bank를 생성해 검사 모델에 연결합니다. 분석 결과는 검사 이력으로 저장하며, 관련 설비 매뉴얼과 점검 문서를 함께 제공합니다.
+PatchCore는 정상 이미지의 대표 특징을 Memory Bank에 저장해 검사 기준으로 활용합니다. 신규 품목 등록 시 선택한 모델 프로파일의 Backbone과 Feature Layer 구성을 유지한 채 해당 품목의 정상 이미지로 **품목별 Memory Bank를 생성해 검사에 적용**하도록 구성했습니다. 분석 결과는 검사 이력으로 저장하고, 관련 설비 매뉴얼과 점검 문서를 함께 제공해 후속 점검과 대응을 지원합니다.
 
 ## 담당 역할
 
 **속도형 이상 탐지 모델 비교 및 선정**
 
 - WideResNet50 기반 PatchCore·PaDiM과 EfficientAD를 판정 성능, 이상 위치 성능, 처리 속도와 GPU 메모리 기준으로 비교
-- Object·Texture 유형과 feature layer별 결과를 검증해 WideResNet50 + PatchCore (layer2)를 속도형 모델로 선정
+- Object·Texture 유형과 Feature Layer별 결과를 검증해 **WideResNet50 + PatchCore (layer2)를 속도형 모델로 선정**
 
 **PatchCore 파라미터 및 Memory Bank 최적화**
 
 - 입력 해상도, 정상 이미지 수와 Memory Bank 크기에 따른 판정·이상 위치 성능 및 처리 속도 비교
-- 카테고리별 대표 특징 추출 비율을 조정하고, Object와 Texture에 적합한 입력 해상도와 Memory Bank 크기 선정
+- Object와 Texture 특성에 맞는 입력 해상도와 Memory Bank 크기를 선정해 저장 Patch Feature 수를 축소
 
-**Teacher output 기반 경량화 실험**
+**Teacher–Student 기반 경량화 실험**
 
-- ResNet18, EfficientNet-B0와 MobileNetV3-small의 판정 성능, 이상 위치 성능, 추론 속도와 학습 GPU 메모리 비교
-- MobileNetV3-small을 경량 후보로 선정하고 heatmap loss, score loss와 mask loss 구성에 따른 성능 비교
+- ResNet18, EfficientNet-B0, MobileNetV3-small의 판정 성능, 이상 위치 성능, 추론 속도와 GPU 메모리를 비교
+- MobileNetV3-small을 경량 후보로 선정하고 Heatmap Loss, Score Loss와 Mask Loss 구성에 따른 성능 비교
 
 ## 핵심 시스템 흐름
 
-1. 신규 품목이 등록되면 해당 품목의 정상 이미지에서 patch feature를 추출해 품목별 Memory Bank를 생성합니다.
-2. 사용자가 검사 이미지를 등록하면 검사 목적과 Object·Texture 유형에 맞는 속도형 또는 성능형 모델 프로파일을 선택합니다.
-3. 선택한 기본 모델에 해당 품목의 Memory Bank를 연결하고, 입력 이미지의 patch feature와 정상 feature 사이의 거리를 계산합니다.
-4. anomaly score와 임계값을 기준으로 정상·불량·재검사를 판정하고, 결함 의심 위치를 heatmap으로 시각화합니다.
-5. 판정 결과와 시각화 이미지를 검사 이력으로 저장합니다. 사용자는 별도의 문서 검색을 통해 관련 설비 매뉴얼과 점검 가이드를 확인합니다.
+<ProjectFlow
+  steps={[
+    { title: "검사 이미지 입력", description: "검사 대상 이미지 업로드" },
+    { title: "유형·프로파일 선택", description: "Object·Texture SPEED·PERF" },
+    { title: "이상 탐지·판정", description: "정상·불량·재검사" },
+    { title: "결과 시각화", description: "Anomaly Score · Heatmap" },
+    { title: "설비 점검 가이드", description: "RAG 기반 원인·조치 안내" },
+  ]}
+/>
 
-## 트러블슈팅  
+## 트러블슈팅
 
 ### **01. 성능과 자원 효율을 고려한 속도형 모델 최적화**
 
 #### **문제 상황**
 
-빠른 1차 판정을 위한 속도형 모델은 판정·이상 위치 성능과 함께 처리 속도와 GPU 메모리를 고려해야 했습니다. 이에 feature layer와 Memory Bank 크기에 따른 성능 및 자원 사용량을 비교해, **성능 기준을 유지하면서 효율적으로 동작하는 구성을 찾고자 했습니다.**
+빠른 1차 판정을 위한 속도형 모델은 판정·이상 위치 성능뿐 아니라 처리 속도와 GPU 메모리까지 함께 고려해야 했습니다. 후보 모델과 feature layer, Memory Bank 구성에 따라 성능과 자원 사용량의 차이가 커, **성능 기준을 유지하면서 효율적으로 동작하는 구성을 선정할 필요가 있었습니다.**
 
 #### **해결 과정**
 
-##### **1. 성능 기준을 적용한 후보 모델 비교**
+##### **1. 후보 모델 비교 및 선정**
 
-- MVTec AD의 Object 및 Texture 카테고리를 동일한 조건으로 구성해 PatchCore, PaDiM, EfficientAD 비교
-- Image AUROC, F1-score, Pixel AUROC와 Per-Region Overlap (PRO)의 최소 기준을 적용해 판정 및 이상 위치 성능 검증
-- 최소 성능 기준을 통과한 후보를 대상으로 처리 속도와 Peak GPU Memory 비교
+- PatchCore·PaDiM·EfficientAD를 Image AUROC, F1-score, Pixel AUROC와 Per-Region Overlap (PRO) 기준으로 비교해 판정·이상 위치 성능 검증
+- 성능 기준을 통과한 후보의 처리 속도와 Peak GPU Memory를 비교해 속도형 모델 후보 선정
 
-##### **2. feature layer별 성능과 자원 사용량 비교**
+##### **2. feature layer 최적화**
 
-- WideResNet50 기반 PatchCore의 layer2, layer3, layer2+layer3 구성 비교
-- 판정 성능을 유지하면서 이상 위치 성능과 GPU 메모리 효율이 더 적합한 layer2 선택  
+- WideResNet50 기반 PatchCore의 layer2, layer3, layer2+layer3 구성을 동일한 조건에서 비교
+- 판정·이상 위치 성능과 GPU 메모리를 함께 검토해 **layer2를 최종 feature layer로 선정**
 
-##### **3. 유형별 Memory Bank와 입력 조건 최적화**
+##### **3. Memory Bank 및 입력 조건 최적화**
 
-- 입력 해상도, 정상 이미지 수와 Memory Bank 크기를 비교하고 카테고리별 patch feature 수에 따라 대표 특징 추출 비율 조정
-- Object는 성능을 유지하며 저장 patch feature 수를 50% 줄인 224×224, full-shot, Memory Bank 10,000 선정
-- Texture는 성능 기준을 유지하며 저장 patch feature 수를 75% 줄인 256×256, full-shot, Memory Bank 5,000 선정
+- 입력 해상도, 정상 이미지 수와 Memory Bank 크기에 따른 성능과 처리 효율 비교
+- Object는 224×224·full-shot·Memory Bank 10,000, Texture는 256×256·full-shot·Memory Bank 5,000으로 최종 설정 선정
 
 #### **결과**
 
-동일한 224×224 조건에서 WideResNet50 기반 PatchCore의 layer2를 사용한 결과 layer2+layer3 대비 Peak GPU Memory가 Object는 3,695.99MB에서 1,360.83MB로 63.2%, Texture는 2,676.18MB에서 969.86MB로 63.8% 감소했습니다.
+WideResNet50 + PatchCore layer2는 layer2+layer3 대비 Peak GPU Memory가 **Object 3,695.99MB → 1,360.83MB로 63.2% 감소**, **Texture 2,676.18MB → 969.86MB로 63.8% 감소**하면서 성능 기준을 유지했습니다. 이후 Memory Bank를 Object 20,000 → 10,000, Texture 20,000 → 5,000으로 조정해 **저장 patch feature 수를 각각 50%, 75% 축소**했습니다.
 
-이후 기준 Memory Bank 20,000개를 Object는 10,000개, Texture는 5,000개로 조정해 저장 patch feature 수를 각각 50%와 75% 축소하면서 최종 성능 기준을 충족했습니다.
+#### **추가 실험 및 판단**
 
-| 유형 | 최종 설정 | Image AUROC / F1-score | PRO |
-| :---: | :---: | :---: | :---: |
-| Object | 224×224, full-shot, Memory Bank 10,000 | 0.93 / 0.93 | 0.88 |
-| Texture | 256×256, full-shot, Memory Bank 5,000 | 0.92 / 0.92 | 0.85 |
-
-#### **추가 실험**
-
-다음 구성은 1차 후보 비교 실험에서 성능 기준을 충족하지 못하거나 자원 사용량 대비 이점이 부족해 제외한 실험입니다. 
-
-- PatchCore layer3 — GPU 메모리는 낮았지만 Image AUROC와 PRO가 하락해 최소 성능 기준에서 제외
+- PatchCore layer3 — GPU 메모리는 낮았지만 판정·이상 위치 성능이 하락해 제외
 - PatchCore layer2+layer3 — 제한적인 성능 차이에 비해 GPU 메모리 증가 폭이 커 제외
-- PaDiM과 EfficientAD — PatchCore layer2보다 판정 또는 이상 위치 성능이 낮아 제외
+- PaDiM·EfficientAD — PatchCore layer2보다 판정 또는 이상 위치 성능이 낮아 제외
 
-## 추가 실험 - Teacher output을 활용한 경량 모델 검토
 
-### **성능형 모델 출력을 학습한 경량 Student 실험**
+## 추가 실험: Teacher output 기반 경량 모델 검토
 
-이 실험은 특정 카테고리의 검사 데이터가 충분히 축적된 상황을 가정해, 기존 속도형 PatchCore와 별도로 적용할 수 있는 경량 모델의 가능성을 검토하기 위해 수행했습니다.
+### **검토 배경**
 
-Real-IAD의 sim_card_set 카테고리를 대상으로 DINOv2-base 기반 PatchCore 3-layer 구성이 생성한 anomaly score와 heatmap을 학습 목표로 활용했습니다. Teacher output을 경량 CNN이 예측하도록 자체 Teacher–Student 학습 구조를 구성했습니다.
+특정 품목의 검사 데이터가 충분히 축적된 상황을 가정해, 기존 PatchCore와 별도로 적용할 수 있는 경량 모델의 가능성을 검토했습니다. Real-IAD의 sim_card_set에서 DINOv2-base + PatchCore 3layers가 생성한 anomaly score와 heatmap을 Teacher output으로 사용하고, 경량 CNN이 이를 학습하도록 Teacher–Student 구조를 구성했습니다.
 
-Student backbone으로 ResNet18, EfficientNet-B0와 MobileNetV3-small을 비교했습니다. MobileNetV3-small은 이상 위치 성능은 상대적으로 낮았지만 추론 속도가 빠르고 학습 GPU 메모리 사용량이 적어 경량 backbone으로 선정했습니다.
+### **실험 과정**
 
-이후 heatmap loss, score loss, mask loss와 단일 feature, 다중 feature 구성을 비교했습니다.
+#### **1. Student backbone 비교**
+
+- ResNet18, EfficientNet-B0, MobileNetV3-small의 판정·이상 위치 성능과 추론 속도, 학습 GPU 메모리 비교
+- 경량화 목적의 속도와 메모리 효율을 함께 고려해 **MobileNetV3-small을 Student backbone으로 선정**
+
+#### **2. Loss 구성에 따른 위치 성능 보정**
+
+- MobileNetV3-small에서 learning rate와 score loss 조합을 비교한 뒤, 낮아진 위치 성능을 보완하기 위해 mask loss 추가
+- mask loss 적용 후 **PRO가 0.551 → 0.624로 개선**되어 위치 성능 보정 효과 확인
+
+#### **3. 단일·다중 feature 구성 비교**
+
+- 기본 단일 feature, mask loss 적용 단일 feature와 다중 feature 구성을 동일한 validation 기준으로 비교
+- PRO 향상과 함께 추론 속도 및 GPU 메모리 증가 폭을 확인해 최종 경량 후보 선정
 
 | 구성 | Validation PRO | 추론 속도 | 학습 GPU 메모리 |
 | :---: | :---: | :---: | :---: |
-| 기본 단일 feature | 0.68 | 51.1 images/sec | 898.3MB |
-| mask loss 적용 단일 feature | 0.70 | 43.7 images/sec | 901.8MB |
-| 다중 feature | 0.72 | 38.7 images/sec | 1,621.3MB |
+| 기본 단일 feature · heatmap loss | 0.684 | 51.1 images/sec | 898.3MB |
+| mask loss 적용 단일 feature · heatmap + mask | 0.702 | 43.7 images/sec | 901.8MB |
+| 다중 feature · heatmap + score + mask | 0.715 | 38.7 images/sec | 1,621.3MB |
 
-다중 feature 구성은 가장 높은 이상 위치 성능을 기록했지만 추론 속도가 낮아지고 학습 GPU 메모리 사용량이 증가했습니다. **성능과 자원 효율을 함께 고려해 mask loss를 적용한 단일 feature 구성을 최종 경량 후보로 선정했습니다.**
+### **결과**
 
-## 주요 성과
+mask loss 적용 단일 feature 구성은 기본 구성 대비 **Validation PRO가 0.684 → 0.702로 개선**되면서 학습 GPU 메모리는 898.3MB → 901.8MB로 거의 유지됐습니다. 다중 feature 구성은 PRO 0.715로 가장 높았지만 추론 속도가 38.7 images/sec로 낮아지고 GPU 메모리가 1,621.3MB까지 증가해, **성능과 자원 효율의 균형이 더 좋은 mask loss 적용 단일 feature 구성을 최종 경량 후보로 선정했습니다.**
 
-### 1. **속도형 이상 탐지 모델 선정**
+### **적용 판단**
 
-object와 texture 유형별 모델을 비교해 WideResNet50 + PatchCore layer2를 선정하고, object Image AUROC 0.93·F1-score 0.93·PRO 0.88과 texture Image AUROC 0.92·F1-score 0.92·PRO 0.85 기록
-
-### 2. **feature layer 및 memory bank 최적화**
-
-layer2 적용으로 layer2+layer3 대비 peak GPU memory를 object 63.2%, texture 63.8% 절감하고, memory bank 조정을 통해 저장 patch feature 수를 각각 50%, 75% 축소
-
-### 3. **teacher output 기반 경량 모델 검토**
-
-MobileNetV3-small 기반 단일 feature 구성에 mask loss를 적용해 학습 GPU memory 증가율을 약 0.4%로 유지하면서 validation PRO를 약 2.6% 향상
+최종 test에서 선정한 경량 Student는 **Image AUROC 0.995, F1-score 0.959, Pixel AUROC 0.970, PRO 0.708**을 기록했습니다. 다만 위치 성능은 기존 Teacher와 SPEED 모델보다 낮아 운영 모델을 대체하지 않고, **향후 카테고리 특화 경량화 후보로 판단했습니다.**
 
 
 ## 회고 및 배운점
 
-이미지 이상 탐지 모델을 선정할 때 Image AUROC와 같은 이미지 단위 평균 지표만으로는 실제 적용 가능성을 판단하기 어렵다는 점을 배웠습니다.  
-정상·이상 판정 성능과 함께 Pixel AUROC와 PRO를 통한 결함 위치 성능, 처리 속도와 GPU 메모리를 함께 확인해야 모델의 목적에 맞는 설정을 선택할 수 있었습니다.
+이미지 이상 탐지 모델은 Image AUROC와 같은 평균 성능만으로 선정하기보다 **판정 성능, 이상 위치 성능, 처리 속도와 GPU 메모리를 함께 비교해야 서비스 목적에 맞는 모델을 선택할 수 있다는 점**을 배웠습니다. 또한 PatchCore에서는 Memory Bank를 크게 유지하는 것보다 정상 분포를 표현할 수 있는 범위에서 저장 feature 수와 검색 비용을 함께 검증하는 것이 중요했습니다.
 
-또한 PatchCore의 Memory Bank는 정상 특징을 많이 저장하는 것보다 정상 분포를 표현할 수 있는 범위와 저장 feature 수, 검색 비용 사이의 균형이 중요하다는 점을 알게 되었습니다. 
-
-Teacher output 기반 경량화 실험에서는 backbone을 가볍게 변경하는 것만으로는 결함 위치 성능을 유지하기 어려웠습니다. 위치 성능을 보완하기 위해서는 heatmap과 mask를 활용한 loss 구성도 함께 검토해야 함을 배웠습니다.
+Teacher–Student 경량화 실험에서는 backbone을 가볍게 변경하는 것만으로는 이상 위치 성능을 유지하기 어려웠으며, **heatmap과 mask를 활용한 loss 구성까지 함께 조정해야 위치 성능을 보완할 수 있음**을 확인했습니다. 동시에 가장 높은 단일 지표보다 성능과 자원 효율의 균형을 기준으로 최종 후보를 판단하는 경험을 얻었습니다.

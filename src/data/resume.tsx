@@ -42,7 +42,7 @@ type HackathonItem = {
 export const DATA = {
   name: "Seoyoung Jo",
   initials: "SJ",
-  url: "https://github.com/seoyoung-J",
+  url: "https://seoyoung-j.github.io/",
   location: "Seoul, Korea",
   locationLink: "https://www.google.com/maps/place/seoul",
   description:
@@ -65,14 +65,15 @@ export const DATA = {
   ],
 
   about: (
-    <>
-      데이터 특성에 맞는 모델을 실험하고, 운영 환경을 고려해 실제 서비스에 적용하는 경험을 쌓았습니다. 객체 탐지·인스턴스 세그멘테이션·이상 탐지 프로젝트를 수행하며 모델을 비교하고 파라미터를 최적화했습니다.{" "}
-      <span className="font-semibold text-foreground underline decoration-1 underline-offset-4">
-        모델 실험을 통해 작은 결함 탐지 성능을 개선하고, 속도형 이상 탐지 모델의 GPU 메모리 사용량을 기존 구성 대비 약 63% 절감했습니다.
-      </span>{" "}
-      또한 탐지 결과를 반영한 RAG 파이프라인을 설계하고, 추론부터 결과 조회까지 이어지는 서비스 흐름을 구현했습니다.
-    </>
+  <>
+    정형·비정형 데이터의 특성에 맞는 모델을 실험하고 성능을 개선하며, 추론 결과를 실제 서비스 흐름까지 연결하는 역량을 쌓아왔습니다. 이 과정에서 정형 데이터 기반 회귀부터 이미지 세그멘테이션과 이상 탐지까지 서로 다른 유형의 모델링 문제를 다뤘습니다.{" "}
+    <span className="font-semibold text-foreground underline decoration-1 underline-offset-4">
+      입력 해상도와 라벨 품질을 조정해 작은 결함 탐지 성능을 개선하고, Feature Layer 구성을 최적화해 유사한 성능을 유지하면서 GPU 메모리 사용량을 약 63% 절감했습니다.
+    </span>{" "}
+    또한 ONNX Runtime 기반 추론 모듈과 LangGraph 기반 RAG 파이프라인을 구현했습니다.
+  </>
   ),
+
   skills: [
     {
       title: "ML / DL",
@@ -87,16 +88,16 @@ export const DATA = {
       title: "Computer Vision",
       skills: [
         "YOLO",
-        "Image Segmentation",
+        "Instance Segmentation",
         "Anomaly Detection",
         "Anomalib",
         "OpenCV",
-        "ONNX Runtime",
       ],
     },
     {
-      title: "Backend / Infra",
+      title: "Serving / Backend",
       skills: [
+        "ONNX Runtime",
         "FastAPI",
         "Spring Boot",
         "PostgreSQL",
@@ -106,7 +107,11 @@ export const DATA = {
     },
     {
       title: "RAG / LLM",
-      skills: ["RAG", "LangGraph", "FAISS"],
+      skills: [
+        "RAG",
+        "LangGraph",
+        "FAISS",
+      ],
     },
   ],
 

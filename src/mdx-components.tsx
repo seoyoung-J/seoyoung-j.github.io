@@ -3,6 +3,7 @@ import { MediaContainer } from "@/components/mdx/media-container";
 import { CaseSection, Paragraphs } from "@/components/project-detail/case-section";
 import { DemoVideo } from "@/components/project-detail/demo-video";
 import { ProjectFigure } from "@/components/project-detail/project-figure";
+import { ProjectFlow } from "@/components/project-detail/project-flow";
 import { SimpleArrowList } from "@/components/project-detail/simple-arrow-list";
 import type { ComponentProps } from "react";
 
@@ -20,6 +21,7 @@ export const mdxComponents = {
   MediaContainer,
   Paragraphs,
   ProjectFigure,
+  ProjectFlow,
   ProjectBody,
   SimpleArrowList,
   pre: (props: ComponentProps<"pre">) => <CodeBlock {...props} />,

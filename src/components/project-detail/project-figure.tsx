@@ -7,6 +7,10 @@ type ProjectFigureProps = {
   alt: string;
   caption?: string;
   contain?: boolean;
+  aspectRatio?: "video";
+  background?: "muted" | "white";
+  topPadding?: boolean;
+  captionAlign?: "center";
 };
 
 export function ProjectFigure({
@@ -14,6 +18,10 @@ export function ProjectFigure({
   alt,
   caption,
   contain = false,
+  aspectRatio,
+  background = "muted",
+  topPadding = false,
+  captionAlign,
 }: ProjectFigureProps) {
   if (!src) {
     return null;
@@ -21,18 +29,30 @@ export function ProjectFigure({
 
   return (
     <figure className="not-prose space-y-3">
-      <div className="overflow-hidden rounded-md border border-border bg-zinc-50 dark:bg-muted/30">
+      <div
+        className={cn(
+          "overflow-hidden rounded-md border border-border",
+          background === "white" ? "bg-white" : "bg-zinc-50 dark:bg-muted/30",
+          aspectRatio === "video" && "aspect-video",
+          topPadding && "pt-3"
+        )}
+      >
         <img
           src={src}
           alt={alt}
           className={cn(
-            "h-auto w-full",
+            aspectRatio === "video" ? "h-full w-full" : "h-auto w-full",
             contain ? "object-contain" : "object-cover"
           )}
         />
       </div>
       {caption && (
-        <figcaption className="text-sm leading-6 text-muted-foreground">
+        <figcaption
+          className={cn(
+            "text-sm leading-6 text-muted-foreground",
+            captionAlign === "center" && "text-center"
+          )}
+        >
           {caption}
         </figcaption>
       )}
