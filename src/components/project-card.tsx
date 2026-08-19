@@ -38,7 +38,7 @@ function ProjectImage({ src, alt }: { src?: string; alt: string }) {
     <img
       src={src}
       alt={alt}
-      className="h-44 w-full object-cover sm:h-48"
+      className="h-44 w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02] group-focus-within:scale-[1.02] sm:h-48"
       onError={() => setImageError(true)}
     />
   );
@@ -56,15 +56,22 @@ export function ProjectCard({
 }: Props) {
   const displayTechStack = tags ?? [];
   const cardClassName = cn(
-    "relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-background transition-colors hover:border-foreground/60",
+    "relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-background",
     href && "cursor-pointer",
     className
   );
 
   const content = (
     <>
-      <div className="relative shrink-0">
+      <div className="relative shrink-0 overflow-hidden">
         <ProjectImage src={image} alt={title} />
+        {href && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-foreground/0 transition-colors duration-300 group-hover:bg-foreground/40 group-focus-within:bg-foreground/40">
+            <span className="rounded-full bg-foreground/80 px-4 py-2 text-sm font-medium tracking-wide text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
+              View Project ↗
+            </span>
+          </div>
+        )}
         {links && links.length > 0 && (
           <div className="absolute right-2 top-2 z-20 flex flex-wrap gap-1.5">
             {links.map((link, idx) => (
