@@ -4,7 +4,7 @@ title: "산업 이미지 이상 탐지·설비 점검 플랫폼"
 dates: "2026년 4월 ~ 2026년 5월"
 role: "속도형 이상 탐지 모델 선정 · 파라미터 최적화 · Teacher output 기반 경량화 실험"
 projectType: "팀 프로젝트"
-summary: "정상 이미지로 Memory Bank를 구성해 제조 이미지의 정상·불량·재검사를 판정하고 이상 위치와 문서 기반 설비 점검 가이드를 제공하는 플랫폼입니다."
+summary: "정상 이미지 기반 Memory Bank로 정상·불량을 판정하고 재검사 여부와 이상 위치, 문서 기반 설비 점검 가이드를 제공하는 플랫폼입니다."
 coverImage: ""
 githubUrl: "https://github.com/human-team1/industrial-ai-platform.git"
 demoUrl: ""
@@ -29,17 +29,17 @@ highlights:
       - "저장 patch feature 수 50%·75% 축소"
   - title: "Teacher output 기반 경량 모델 검토"
     items:
-      - "mask loss 적용 시 학습 GPU 메모리 증가율 약 0.4%"
-      - "validation PRO 0.68 → 0.70"
+      - "mask loss 적용으로 PRO 0.68 → 0.70"
+      - "단일 feature 경량 후보 선정"
 ---
 
 ## 프로젝트 개요
 
 제조 현장의 외관 검사는 작업자의 육안 판단에 따라 검사 결과에 편차가 발생하거나 결함을 놓칠 수 있으며, 결함 이미지와 라벨을 충분히 확보하기 어려워 모든 결함 유형을 사전에 학습하는 데 한계가 있습니다. 이에 이미지 기반 검사 판정과 이상 위치 확인을 자동화하고, 문서 기반 설비 점검 가이드로 작업자의 대응 판단을 지원하는 플랫폼을 구현했습니다.
 
-**부품 형상과 구조의 이상을 검사하는 Object 유형과 표면·패턴의 변화를 검사하는 Texture 유형을 구분하고, 빠른 1차 판정을 위한 속도형 모델과 정밀 분석을 위한 성능형 모델을 적용**했습니다. 정상 이미지의 특징을 기준으로 정상·불량·재검사를 판정하고 Heatmap으로 이상 위치를 시각화합니다.
+**부품 형상과 구조의 이상을 검사하는 Object 유형과 표면·패턴의 변화를 검사하는 Texture 유형을 구분하고 빠른 1차 판정을 위한 속도형 모델과 정밀 분석을 위한 성능형 모델을 적용**했습니다. 정상 이미지의 특징을 기준으로 정상·불량·재검사를 판정하고 Heatmap으로 이상 위치를 시각화합니다.
 
-PatchCore는 정상 이미지의 대표 특징을 Memory Bank에 저장해 검사 기준으로 활용합니다. 신규 품목 등록 시 선택한 모델 프로파일의 Backbone과 feature layer 구성을 유지하고, 해당 품목의 정상 이미지로 **품목별 Memory Bank를 생성해 검사에 적용**하도록 구성했습니다. 분석 결과와 관련 설비 문서를 함께 제공해 후속 점검과 대응을 지원합니다.
+PatchCore는 정상 이미지의 대표 특징을 Memory Bank에 저장해 검사 기준으로 활용합니다. **신규 품목 등록 시 선택한 모델 프로파일의 Backbone과 feature layer 구성을 유지하고, 해당 품목의 정상 이미지로 품목별 Memory Bank를 생성해 검사에 적용**하도록 구성했습니다. 분석 결과와 관련 설비 문서를 함께 제공해 후속 점검과 대응을 지원합니다.
 
 ## 담당 역할
 
@@ -129,12 +129,12 @@ Real-IAD 데이터의 sim_card_set 카테고리에서 DINOv2-base + PatchCore 3l
 #### **3. 단일·다중 feature 구성 비교**
 
 - 기본 단일 feature, mask loss 적용 단일 feature와 다중 feature 구성을 validation 기준으로 비교
-- PRO, 추론 속도와 GPU 메모리를 함께 검토해 최종 경량 후보 선정
+- PRO, 추론 속도와 GPU 메모리를 함께 검토해 **mask loss 적용 단일 feature 구성**을 최종 경량 후보로 선정
 
 | 구성 | Validation PRO | 추론 속도 | 학습 GPU 메모리 |
 | :---: | :---: | :---: | :---: |
 | 기본 단일 feature · heatmap loss | 0.684 | 51.1 images/sec | 898.3MB |
-| mask loss 적용 단일 feature · heatmap + mask | 0.702 | 43.7 images/sec | 901.8MB |
+| **mask loss 적용 단일 feature · heatmap + mask** | **0.702** | **43.7 images/sec** | **901.8MB** |
 | 다중 feature · heatmap + score + mask | 0.715 | 38.7 images/sec | 1,621.3MB |
 
 ### **결과**
