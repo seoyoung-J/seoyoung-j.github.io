@@ -104,7 +104,8 @@ export const DATA = {
         "Spring Boot",
         "PostgreSQL",
         "Docker",
-        "AWS",
+        "AWS S3",
+        "AWS SQS",
       ],
     },
     {
