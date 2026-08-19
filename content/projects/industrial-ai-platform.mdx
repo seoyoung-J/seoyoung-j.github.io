@@ -29,7 +29,7 @@ highlights:
   - title: "Teacher output 기반 경량 모델 검토"
     items:
       - "mask loss 적용 시 학습 GPU 메모리 증가율 약 0.4%"
-      - "validation PRO 약 2.6% 향상"
+      - "validation PRO 0.68 → 0.70"
 ---
 
 ## 프로젝트 개요
@@ -120,13 +120,11 @@ WideResNet50 + PatchCore layer2는 layer2+layer3 대비 Peak GPU Memory가 **Obj
 
 #### **2. Loss 구성에 따른 위치 성능 보정**
 
-- MobileNetV3-small에서 learning rate와 score loss 조합을 비교한 뒤, 낮아진 위치 성능을 보완하기 위해 mask loss 추가
-- mask loss 적용 후 **PRO가 0.551 → 0.624로 개선**되어 위치 성능 보정 효과 확인
-
+MobileNetV3-small에서 learning rate와 score loss 조합을 비교해 위치 성능 저하를 확인하고 mask loss를 추가해 보정 가능성 검증
 #### **3. 단일·다중 feature 구성 비교**
 
-- 기본 단일 feature, mask loss 적용 단일 feature와 다중 feature 구성을 동일한 validation 기준으로 비교
-- PRO 향상과 함께 추론 속도 및 GPU 메모리 증가 폭을 확인해 최종 경량 후보 선정
+- 기본 단일 feature, mask loss 적용 단일 feature와 다중 feature 구성을 validation 기준으로 비교
+- PRO, 추론 속도와 GPU 메모리를 함께 검토해 최종 경량 후보 선정
 
 | 구성 | Validation PRO | 추론 속도 | 학습 GPU 메모리 |
 | :---: | :---: | :---: | :---: |

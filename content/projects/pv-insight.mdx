@@ -47,7 +47,7 @@ highlights:
 **RGB 세그멘테이션 모델링** 
 
 - YOLOv26s-seg 기반 RGB 5개 클래스 모델의 입력 해상도, 라벨 정제, fine-tuning 조건을 비교해 작은 결함 탐지 성능 개선
-- 26개 checkpoint를 동일 조건으로 평가해 전체 및 클래스별 성능 비교
+- 상위 성능을 보인 두 모델을 fine-tuning하고, validation 기준으로 checkpoint별 전체 및 클래스별 성능 비교
 
 **ONNX 추론 및 FastAPI AI Worker 구현**
 
@@ -96,9 +96,9 @@ highlights:
 
 ##### **3. fine-tuning 및 최종 모델 선정**
 
-- 상위 후보 두 모델에 낮은 학습률, 앞부분 11개 레이어 고정, Mosaic·MixUp·CutMix 비활성화 조건으로 추가 학습
-- 총 26개 checkpoint를 동일한 validation 데이터로 평가
-- 전체 mask 성능과 클래스별 지표의 균형이 가장 좋았던 **Epoch 5 checkpoint를 최종 모델로 선정**
+- 상위 후보 두 모델을 각각 10 epoch fine-tuning하고 낮은 학습률, 앞부분 11개 레이어 고정, Mosaic·MixUp·CutMix 비활성화 조건 적용
+- 같은 validation 데이터 및 평가 기준을 적용하여 원본 모델과 epoch별 checkpoint의 전체 mask 성능과 클래스별 지표 비교
+- 전체 성능과 클래스별 지표의 균형이 가장 좋았던 **epoch 5 checkpoint를 최종 모델로 선정**
 
 #### **결과**
 
