@@ -89,7 +89,7 @@ export function ProjectHeader({ project }: { project: ProjectDetail }) {
               size="sm"
               className={
                 link.isPrimary
-                  ? "h-11 rounded-full bg-foreground px-6 text-sm font-medium text-background hover:bg-foreground/85 hover:text-background"
+                  ? "h-10 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:bg-foreground/85 hover:text-background"
                   : undefined
               }
             >

@@ -26,7 +26,7 @@ highlights:
       - "식생 침범 recall 0.41 → 0.57"
   - title: "ONNX 추론 정합성 검증"
     items:
-      - "ONNX 변환 후 mask IoU 0.96 이상으로 일치도 확인"
+      - "ONNX 변환 후 mask mAP50 0.709 유지"
       - "모델 아티팩트 크기 약 29% 축소"
   - title: "비동기 분석 흐름 구현"
     items:
@@ -79,26 +79,24 @@ RGB와 열화상 이미지는 확인할 수 있는 이상 유형이 달라 각�
 #### **문제 상황**
 
 원본 RGB 이미지는 평균 약 2000px의 고해상도였지만, AWS 기반 추론 환경의 메모리 사용량과 처리 비용을 고려해 입력 해상도를 낮춰야 했습니다.  
-이 과정에서 식생 침범과 파손처럼 작은 이상 영역의 픽셀 정보가 줄어 미탐이 증가했고, 전체 mask 성능과 클래스별 성능 편차 개선이 필요했습니다.
+이 과정에서 **식생 침범과 파손처럼 작은 이상 영역의 픽셀 정보가 줄어 미탐이 증가했고, 전체 mask 성능과 클래스별 성능 편차 개선이 필요했습니다.**
 
 #### **해결 과정**
 
 ##### **1. 입력 해상도 확대**
 
 - 동일한 조건에서 입력 해상도 1024와 1280 비교
-- **mask mAP50-95가 0.42에서 0.43으로 향상된 1280 모델**을 후속 실험의 기준으로 선정
+- mask mAP50-95가 0.42에서 0.43으로 향상된 1280 모델을 후속 실험의 기준으로 선정
 
 ##### **2. 식생 침범 라벨 정제**
 
-- 전체 3,326장을 검수해 라벨 누락, 지나치게 작은 mask, 구분이 모호한 이미지 139장 제외
-- 데이터셋을 3,187장으로 정리하고, 작은 mask만 제거하는 보수적 기준과 제거 범위를 확대한 강화형 기준 비교  
-- 식생 침범 성능 개선 폭이 더 컸던 강화형 기준을 최종 학습 데이터에 적용
+- 전체 3,326장을 검수해 라벨 누락, 지나치게 작은 mask, 구분이 모호한 이미지 139장을 제외하고 3,187장으로 정리
+- 작은 mask 제거 기준을 달리한 두 전처리 방식을 비교해 식생 침범 성능 개선 폭이 더 컸던 강화형 기준을 최종 적용
 
 ##### **3. fine-tuning 및 최종 모델 선정**
 
 - 상위 후보 두 모델을 각각 10 epoch fine-tuning하고 낮은 학습률, 앞부분 11개 레이어 고정, Mosaic·MixUp·CutMix 비활성화 조건 적용
-- 같은 validation 데이터 및 평가 기준을 적용하여 원본 모델과 epoch별 checkpoint의 전체 mask 성능과 클래스별 지표 비교
-- 전체 성능과 클래스별 지표의 균형이 가장 좋았던 **epoch 5 checkpoint를 최종 모델로 선정**
+- 동일한 validation 기준에서 원본 모델과 epoch별 checkpoint의 전체 및 클래스별 성능을 비교해 성능 균형이 가장 좋았던 epoch 5 checkpoint를 최종 모델로 선정
 
 #### **결과**
 
@@ -116,37 +114,43 @@ validation mask mAP50은 **0.68에서 0.71로**, 식생 침범 mask recall은 **
 - Slicing Aided Hyper Inference (SAHI) 기반 타일 추론 — 처리 시간이 약 3배 증가해 서비스 적용에서 제외
 - 패널 어레이 기반 동적 crop 추론 — 이미지당 평균 13.6회의 반복 추론이 필요해 제외
 - 오염(dusty) 클래스 개선 실험 — 별도 모델과 라벨 정제 모두 test 일반화 또는 전체 성능이 하락해 제외
-- 파손(broken) 클래스 보강 fine-tuning — recall은 상승했지만 precision과 종합 성능이 하락해 제외  
+- 파손(broken) 클래스 보강 fine-tuning — recall은 상승했지만 precision과 종합 성능이 하락해 제외
 
 
 ### **02. ONNX Runtime 원시 출력의 instance mask 복원**
 
 #### **문제 상황**
 
-Ultralytics 추론에서는 bounding box와 instance mask 후처리가 자동으로 제공되지만 raw ONNX 모델은 원시 tensor만 반환해 별도의 후처리가 필요했습니다. 초기 후처리에서 letterbox의 축소 비율과 여백이 정확히 복원되지 않아 서비스 화면의 결함 박스와 세그멘테이션 영역이 실제 위치와 어긋나는 문제가 있었습니다.
+Ultralytics 추론에서는 bounding box와 instance mask 후처리가 자동으로 제공되지만 raw ONNX 모델은 원시 tensor만 반환해 별도의 후처리가 필요했습니다. 초기 후처리에서 **letterbox의 축소 비율과 여백이 정확히 복원되지 않아 서비스 화면의 결함 박스와 세그멘테이션 영역이 실제 위치와 어긋나는 문제가 있었습니다.**
 
 #### **해결 과정**
 
 ##### **1. ONNX 변환 및 출력 검증**
 
-- 최종 RGB 모델을 raw FP32 ONNX로 변환하고 ONNX checker와 ONNX Runtime CPU 환경에서 모델 로딩 및 출력 구조 검증
-- 동일 이미지의 PyTorch와 ONNX 결과를 비교해 bounding box와 instance mask 정합성 검증
+- 최종 RGB 모델을 raw FP32 ONNX로 변환하고 ONNX checker와 ONNX Runtime으로 모델 로딩 및 출력 구조 검증
+- 동일한 validation 308장에서 PyTorch와 ONNX Runtime의 성능을 비교하고, 동일 이미지의 bounding box와 instance mask 정합성 검증
 
 ##### **2. instance mask 후처리 구현**
 
 - letterbox와 정규화 전처리 후 confidence 필터링, 클래스별 NMS와 원본 좌표 복원 구현
-- mask coefficient와 prototype을 결합하고 sigmoid·threshold·crop·resize를 적용해 객체별 instance mask 복원
-- validation 이미지 308장을 비교해 **confidence 0.15, NMS IoU 0.40, mask threshold 0.30을 최종 기준으로 적용**
+- mask coefficient와 prototype을 결합하고 sigmoid, crop, resize를 적용해 객체별 instance mask 복원
+- 같은 validation set에서 후처리 조건을 비교해 confidence 0.15, NMS IoU 0.40, mask threshold 0.30을 최종 적용
 
 ##### **3. AI Worker 적용 및 모델 검증**
 
-- ONNX Runtime 추론과 후처리 모듈을 FastAPI AI Worker의 이미지 분석 흐름에 적용
-- 모델 경로, 입력 크기, 클래스와 threshold를 manifest로 관리
-- SHA-256 검증과 smoke test를 적용해 모델 파일의 무결성과 정상 로딩 여부 확인
+- ONNX Runtime 추론과 후처리 모듈을 FastAPI AI Worker에 적용하고 모델 설정을 manifest로 관리
+- SHA-256 검증과 smoke test로 모델 파일의 무결성과 정상 로딩 여부 확인
 
 #### **결과**
 
-PyTorch와 ONNX에서 매칭된 객체를 비교한 결과, bounding box와 instance mask가 높은 수준으로 일치했습니다. 또한 **ONNX 변환을 통해 모델 아티팩트 크기를 기존 PyTorch 모델보다 약 29% 줄이고** 원시 출력을 서비스에서 사용할 수 있는 탐지 결과로 복원했습니다.
+동일한 validation 308장에서 PyTorch와 ONNX Runtime을 비교한 결과, **mask mAP50은 0.706 → 0.709, mAP50-95는 0.438 → 0.440으로 변환 후 성능이 유지**됐습니다.
+
+| Runtime | Mask Precision | Mask Recall | mask mAP50 | mask mAP50-95 |
+| :---: | :---: | :---: | :---: | :---: |
+| PyTorch | 0.691 | 0.651 | 0.706 | 0.438 |
+| ONNX Runtime | 0.680 | 0.649 | 0.709 | 0.440 |
+
+PyTorch와 ONNX에서 매칭된 객체를 비교한 결과, **bounding box와 instance mask가 높은 수준으로 일치했으며 모델 아티팩트 크기를 PyTorch 대비 약 29% 감소**할 수 있었습니다.
 
 | 비교 항목 | 이미지별 중앙값 범위 |
 | :---: | :---: |
@@ -158,33 +162,32 @@ PyTorch와 ONNX에서 매칭된 객체를 비교한 결과, bounding box와 inst
 
 #### **문제 상황**
 
-이미지 추론을 사용자 HTTP 요청과 분리하기 위해 Amazon Simple Queue Service (SQS) 기반 비동기 작업으로 구성했습니다. 그러나 동일한 메시지가 다시 전달되거나 여러 Worker가 같은 QUEUED 상태의 분석 Job을 동시에 조회하면 추론과 결과 저장이 중복 실행되어 분석 상태와 결과의 정합성이 깨질 수 있었습니다.
+이미지 추론을 사용자 HTTP 요청과 분리하기 위해 SQS 기반 비동기 작업으로 구성했습니다. 그러나 **동일 메시지의 재전달이나 여러 Worker의 동시 수신으로 추론과 결과 저장이 중복 실행될 가능성이 있었습니다.**
 
 #### **해결 과정**
 
 ##### **1. 메시지와 분석 대상 검증**
 
-- 수신 메시지의 jobId와 imageId 유효성 및 데이터베이스 조회 결과와의 일치 여부 검증
-- Job 상태를 기준으로 QUEUED만 처리 대상으로 구분하고 RUNNING·SUCCEEDED·FAILED는 추가 추론 대상에서 제외
+- jobId, imageId와 데이터베이스 조회 결과를 검증하고 QUEUED 상태의 Job만 처리 대상으로 구분
+- RUNNING, SUCCEEDED, FAILED 상태는 추가 추론 대상에서 제외
 
 ##### **2. 조건부 상태 전환**
 
-- QUEUED 상태인 Job만 RUNNING으로 변경하는 조건부 update 적용
-- 상태 전환에 성공한 Worker만 처리 권한을 획득한 것으로 판단하고 추론 수행
-- 처리 성공 시 SUCCEEDED, 실패 시 오류 코드와 메시지를 포함한 FAILED 상태 반영
+- QUEUED 상태인 Job만 RUNNING으로 변경하고 상태 전환에 성공한 Worker만 추론 수행
+- 처리 결과에 따라 SUCCEEDED 또는 오류 정보를 포함한 FAILED 상태로 변경
 
 ##### **3. 메시지 삭제 시점 분리**
 
-- Job 상태와 처리 결과를 데이터베이스에 먼저 반영한 뒤 SQS 메시지 삭제
-- 정상 완료 또는 처리 불필요로 판단된 작업과 재시도가 필요한 오류의 메시지 삭제 정책 분리
+- Job 상태와 처리 결과를 데이터베이스에 반영한 뒤 SQS 메시지 삭제
+- 정상 완료와 재시도가 필요한 오류를 구분해 메시지 삭제 정책 적용
 
 #### **결과**
 
-QUEUED에서 RUNNING으로의 **조건부 상태 전환에 성공한 하나의 Worker만 추론하도록 구성**했습니다. 이를 통해 동일한 jobId의 반복 전달이나 여러 Worker의 동시 수신으로 발생할 수 있는 중복 추론과 결과 중복 저장 가능성을 낮췄습니다.
+QUEUED에서 RUNNING으로의 **조건부 상태 전환에 성공한 하나의 Worker만 추론**하도록 하여 동일한 jobId가 반복 전달되거나 여러 Worker가 동시에 메시지를 수신해도 **중복 추론과 결과 저장을 방지**했습니다.
 
 
 ## 회고 및 배운점
 
-작은 객체 세그멘테이션 실험을 통해 전체 평균 지표뿐 아니라 입력 해상도, 라벨 품질, 클래스별 precision·recall과 실제 예측 결과를 함께 확인해야 정확한 개선 여부를 판단할 수 있다는 점을 배웠습니다. 
+다중 클래스 instance segmentation을 수행하면서 전체 평균 성능뿐 아니라 클래스별 성능 편차와 작은 객체의 미탐을 함께 보는 것이 중요하다는 점을 알게 되었습니다. 입력 해상도와 라벨 품질을 조정하고 SAHI 기반 sliced inference 같은 작은 객체 탐지 방법도 비교하면서, 성능 개선뿐 아니라 추론 비용과 서비스 적용 가능성까지 함께 고려했습니다.
 
-또한 ONNX가 항상 추론 속도를 높이는 것은 아니므로 실제 환경에서 속도, 정합성, 모델 크기를 비교해야 하며 SQS 비동기 처리에서는 Job 상태 전환과 메시지 삭제 정책까지 함께 설계해야 중복 처리를 줄일 수 있음을 알게 되었습니다. 
+ONNX 변환에서는 변환 전후의 성능과 출력 정합성을 실제 추론 환경에서 함께 검증했고, SQS 비동기 처리에서는 Job 상태 전이와 메시지 삭제 시점을 함께 설계했습니다. 이를 통해 모델을 서비스에 적용할 때는 모델 성능뿐 아니라 추론 환경과 상태 관리까지 함께 고려해야 한다는 점을 배웠습니다.
