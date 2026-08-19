@@ -10,7 +10,7 @@ const BLUR_FADE_DELAY = 0.04;
 
 function SkillBadge({ skill }: { skill: string }) {
   return (
-    <span className="inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-border bg-card px-2.5 text-sm font-medium text-zinc-600 transition-colors hover:border-[#5F73C6]/45 hover:text-zinc-800 dark:bg-card dark:text-zinc-300 dark:hover:border-[#8998D8]/50 dark:hover:text-zinc-100">
+    <span className="inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-border bg-card px-2.5 text-sm font-medium text-zinc-600 transition-colors hover:border-foreground/30 hover:text-zinc-800 dark:bg-card dark:text-zinc-300 dark:hover:text-zinc-100">
       {skill}
     </span>
   );

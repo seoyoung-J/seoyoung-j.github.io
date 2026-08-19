@@ -56,7 +56,7 @@ export function ProjectCard({
 }: Props) {
   const displayTechStack = tags ?? [];
   const cardClassName = cn(
-    "relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-background",
+    "relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-background transition-colors hover:border-foreground/30 focus-within:border-foreground/30",
     href && "cursor-pointer",
     className
   );
