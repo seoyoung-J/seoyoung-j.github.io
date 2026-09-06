@@ -48,7 +48,7 @@ const PROJECT_ARTICLE_CLASS =
   "prose project-mdx-content prose-zinc mt-8 max-w-none text-pretty font-sans leading-relaxed text-foreground/70 dark:prose-invert prose-headings:text-foreground prose-headings:tracking-tight prose-h2:mt-12 prose-h2:border-t prose-h2:border-border prose-h2:pt-10 prose-h2:text-xl prose-h2:font-semibold prose-h3:mt-8 prose-h3:text-lg prose-h3:font-semibold prose-h4:mt-5 prose-h4:text-base prose-h4:font-semibold prose-p:leading-7 prose-li:my-1 prose-li:leading-7 prose-strong:text-foreground prose-hr:my-10 prose-hr:border-border [&>h2:first-child]:mt-0 [&>h2:first-child]:border-t-0 [&>h2:first-child]:pt-0";
 
 // Projects opted in to the tightened h3/h4/h5 hierarchy for long case studies.
-const REFINED_TYPOGRAPHY_SLUGS = new Set(["pv-insight", "industrial-ai-platform", "car-damage-rag-assistant", "cutting-tool-life-prediction"]);
+const REFINED_TYPOGRAPHY_SLUGS = new Set(["pv-insight", "industrial-ai-platform", "car-damage-rag-assistant", "cutting-tool-life-prediction", "google-work-agent"]);
 
 export function generateStaticParams() {
   return allProjects.map((project) => ({

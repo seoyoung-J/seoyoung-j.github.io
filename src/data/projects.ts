@@ -129,4 +129,18 @@ export const portfolioProjects = [
     showOnHome: true,
     order: 4,
   },
+  {
+  slug: "google-work-agent",
+  title: "Google Work Agent",
+  href: "/projects/google-work-agent",
+  dates: "2026년 8월",
+  description:
+    "Google Workspace 데이터를 조회·분석해 업무를 수행하는 Agent 시스템입니다. 6개 Agent Workflow와 결정적 Supervisor Routing을 구현했습니다.",
+  technologies: ["LangGraph", "Python", "FastAPI", "MCP"],
+  image: "",
+  githubUrl: "",
+  demoUrl: "",
+  showOnHome: false,
+  order: 5,
+  },
 ] satisfies PortfolioProject[];

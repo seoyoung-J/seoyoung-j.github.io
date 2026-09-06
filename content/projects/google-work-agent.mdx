@@ -1,0 +1,163 @@
+---
+slug: "google-work-agent"
+title: "Google Work Agent"
+dates: "2026년 8월"
+role: "6개 Agent Workflow · Supervisor Routing · Google Workspace 연동 · GitHub MCP Tool"
+projectType: "팀 프로젝트"
+summary: "Google Workspace 데이터를 조회·분석하고 필요한 작업까지 수행하는 업무 Agent 시스템입니다."
+coverImage: ""
+githubUrl: ""
+demoUrl: ""
+demoVideo: "/projects/google-work-agent/demo.mp4"
+technologies:
+  - "LangGraph"
+  - "Python"
+  - "FastAPI"
+  - "MCP"
+  - "React"
+  - "TypeScript"
+highlights:
+  - title: "Agent Workflow 제어"
+    items:
+      - "6개 Agent 초기 Workflow·Supervisor Routing 구현"
+      - "Run Budget으로 재검색·재계획 반복 제한"
+
+  - title: "Gmail API 조회 성능 개선"
+    items:
+      - "Thread metadata 최대 3개 동시 조회"
+      - "로딩 시간 약 7.5초 → 2.8초로 63% 단축"
+
+  - title: "GitHub MCP Write 안전성 보완"
+    items:
+      - "Write 전 대상 유형 검증 적용"
+      - "PR 대상 수정 요청 0회·Regression Test 6개 추가"
+---
+
+## 프로젝트 개요
+
+여러 업무 도구에 흩어진 메일·할 일·일정 정보를 각각 확인하고 처리해야 하는 반복 작업을 줄이기 위해 프로젝트를 진행했습니다. Google Work Agent는 Gmail, Google Tasks, Google Calendar의 업무 데이터를 자연어 요청으로 조회·분석하고, 필요한 경우 실행 계획과 승인 기반 업무 처리까지 연결하는 업무 Agent입니다.
+
+**각 서비스의 API를 Agent가 직접 다루지 않도록 MCP를 외부 Tool의 공통 연결 구조로 활용했습니다.** 또한 서비스가 늘어날수록 sLLM이 처리해야 할 Tool과 데이터 구조가 복잡해지는 문제를 줄이기 위해 Google Tasks의 할 일과 GitHub Issue처럼 성격이 유사한 업무 데이터를 공통 형태로 처리했습니다. 현재 Google Workspace와 GitHub를 연결하고, 향후 Notion 등 새로운 서비스도 Connector 추가로 확장할 수 있도록 구성했습니다.
+
+## 담당 역할
+
+**6개 Agent Workflow 초기 구조 구현**
+
+- 6개 Agent의 초기 Workflow와 Typed Result 계약을 구현해 단계별 판단 결과 구조화
+- Agent Result와 Workflow Phase를 기준으로 다음 단계를 결정하는 Deterministic Supervisor Routing 구현
+
+**Google Workspace Backend·Frontend 연동**
+
+- Gmail·Calendar·Tasks의 실제 Resource 조회 Backend와 Sidebar UI를 연동해 Workspace 데이터 탐색 흐름 구현
+- Gmail Thread metadata를 최대 3개까지 동시 조회하도록 개선해 페이지 로딩 시간을 약 7.5초 → 2.8초로 63% 단축
+
+**GitHub MCP Tool 연동 및 실행 안전성 보완**
+
+- GitHub Issue 수정·종료·재오픈 Write Tool의 MCP 연동과 실행 경로 검증
+- Write 전 대상 유형 검증을 적용해 Pull Request 대상 수정 요청 0회, Regression Test 6개 추가
+
+## 핵심 시스템 흐름 및 LangGraph 구조
+
+<ServiceArchitecture />
+
+### LangGraph Workflow
+
+<ProjectFlow
+  steps={[
+    { title: "Request Understanding", description: "요청 · 제약 해석" },
+    { title: "Tool Route", description: "Tool · Resource 결정" },
+    { title: "Retrieval", description: "데이터 · 근거 조회" },
+    { title: "Work Analysis", description: "업무 정보 분석" },
+    { title: "Planning", description: "답변 · Action Plan" },
+    { title: "Review", description: "계획 · 근거 검토" },
+  ]}
+/>
+
+각 Agent는 Typed Result를 반환하고 Supervisor가 현재 Workflow State를 기준으로 다음 단계를 결정합니다. 추가 정보가 필요한 경우 Retrieval, 계획 수정이 필요한 경우 Planning, Tool 경로를 다시 판단해야 하는 경우 Tool Route로 돌아갈 수 있으며, Review의 PASS 결과는 Domain Validation으로 전달됩니다.
+
+모든 요청이 모든 단계를 거치는 것은 아닙니다. 외부 데이터 조회가 필요하지 않으면 Retrieval을, 별도 업무 분석이 필요하지 않으면 Work Analysis를 생략할 수 있으며, 요청의 성격과 Agent Result에 따라 필요한 단계만 수행하도록 구성했습니다.
+
+## 트러블슈팅
+
+### **01. Agent 단계 반복 실행으로 인한 LLM 호출 누적 방지**
+
+#### **문제 상황**
+
+후속 Agent에서 정보 부족이나 경로 오류가 발견되면 Retrieval을 추가 수행하거나 Planning을 수정하고, Tool Route를 다시 판단하는 흐름이 필요했습니다. 그러나 **앞선 단계를 다시 실행하는 과정에서 동일한 부족 정보나 실패가 반복되면 LLM 호출이 계속 누적되고 Workflow가 불필요하게 반복될 가능성**이 있어 실행 횟수를 제어할 필요가 있었습니다.
+
+#### **해결 과정**
+
+##### **1. 재실행 원인별 경로 분리**
+
+- 추가 정보가 필요한 경우 Retrieval, 계획 수정이 필요한 경우 Planning, Resource·Tool 경로를 다시 판단해야 하는 경우 Tool Route로 이동하도록 경로 분리
+- 각 Agent는 다음 Agent를 직접 호출하지 않고 Typed Result를 반환하며, Supervisor가 현재 Phase와 Result를 기준으로 다음 실행 단계 결정
+
+##### **2. Run Budget 기반 호출 횟수 제한**
+
+- 최초 Retrieval 이후 Additional Retrieval은 최대 2회, Planning Revision은 최대 2회로 제한
+- 일반 Workflow의 LLM Call Cap은 8회로 설정하고, Planning Revision 발생 시 최대 12회, Additional Retrieval 발생 시 최대 14회까지 확장
+- 두 유형이 함께 발생하더라도 전체 LLM 호출은 Absolute Max 16회를 넘지 않도록 제한
+
+##### **3. 동일 실패에 대한 반복 실행 제한**
+
+- 동일 Node와 동일 Failure Signature에서 발생하는 Semantic Revision은 최대 1회로 제한
+- Budget이 소진되면 추가 LLM 호출을 중단하고 PARTIAL, 사용자 확인, 차단 등 정의된 대기·종료 경로로 전환
+
+#### **결과**
+
+추가 검색이나 계획 수정처럼 필요한 재실행 경로는 유지하면서, **동일한 실패에 따른 Agent 단계 반복 실행과 LLM 호출이 무제한 이어지지 않도록 Run Budget과 Failure Signature 기준의 실행 상한을 적용**했습니다. Agent의 판단과 Workflow 제어를 분리해 Supervisor가 현재 State와 Budget을 기준으로 다음 실행 단계와 종료 여부를 결정하도록 구성했습니다.
+
+8·12·14·16회의 호출 상한은 성능 실험으로 도출한 최적값이 아니라 프로젝트에서 정의한 실행 계약값입니다.
+
+### **02. GitHub MCP Write Tool의 실행 안전 경계 보완**
+
+#### **문제 상황**
+
+GitHub Issue 수정·종료·재오픈 Tool에서 대상이 실제 Issue인지 Pull Request인지 확인하기 전에 수정 요청이 실행될 수 있었습니다. Issue와 Pull Request가 동일한 번호 체계를 공유하기 때문에 **잘못된 PR 번호가 Issue 번호로 전달되면 대상 검증보다 GitHub 수정 요청이 먼저 실행될 가능성**이 있었습니다.
+
+#### **해결 과정**
+
+##### **1. Write 실행 경로 검증**
+
+- PR 번호를 Issue 번호로 전달해 mutation 선행 가능성 재현
+- 오류 반환 여부가 아니라 실제 GitHub 수정 요청의 시작 여부를 안전성 기준으로 설정
+
+##### **2. 수정 요청 전 대상 유형 검증 적용**
+
+- Issue 조회 결과에 pull_request 정보가 있으면 Issue 전용 Write를 차단하도록 precheck 추가
+- 일반 Issue인 경우에만 GitHub 수정 요청을 수행하도록 실행 순서를 변경하고 회귀 테스트로 검증
+
+#### **결과**
+
+Issue Write 이전에 대상 유형을 검증하도록 실행 순서를 변경한 결과, **Pull Request 대상 수정 요청은 0회로 차단하면서 일반 Issue 대상 수정 요청은 1회 정상 수행**되는 것을 확인했습니다. 또한 해당 실행 경계를 검증하는 **Regression Test 6개를 추가**했습니다.
+
+### **03. Gmail 페이지 탐색 지연 개선**
+
+#### **문제 상황**
+
+Gmail API는 다음 PageToken을 기준으로 페이지를 조회하지만 UI에서는 숫자 페이지네이션을 제공해야 했습니다. 또한 페이지마다 최대 20개 Thread의 metadata를 순차적으로 조회하면서 **표시 대상 페이지의 로딩 시간이 약 7.5초까지 증가**해 페이지 탐색 지연을 개선할 필요가 있었습니다.
+
+#### **해결 과정**
+
+##### **1. PageToken과 UI 페이지 상태 분리**
+
+- Provider의 PageToken을 내부에서 관리하고 UI에는 숫자 페이지네이션으로 제공
+- 목적 페이지로 이동하는 중간 단계에서는 metadata 조회를 생략하고 Thread ID와 다음 PageToken만 확보
+- 이미 조회한 페이지는 Session Cache에서 재사용하도록 구성
+
+##### **2. Metadata 동시 조회 및 인접 페이지 Prefetch**
+
+- 표시 대상 페이지의 Thread metadata를 최대 3개씩 동시 조회하도록 변경
+- 현재 페이지를 표시하는 동안 이전·다음 페이지의 Thread metadata를 백그라운드에서 미리 조회해 Cache에 저장
+
+#### **결과**
+
+Thread metadata 조회 방식을 개선한 결과, **페이지 로딩 시간을 약 7.5초 → 2.8초로 63% 단축**했습니다. 또한 현재 페이지의 이전·다음 페이지를 미리 조회하도록 구성해 연속적인 페이지 이동에서는 Cache에 저장된 결과를 재사용할 수 있도록 했습니다.
+
+## 회고 및 배운점
+
+Multi-Agent 시스템에서는 Agent 수를 늘리는 것보다 **각 Agent의 판단 책임과 Typed Result, State Ownership, Supervisor Routing과 종료 조건을 명확히 분리하는 것**이 중요했습니다. Agent의 판단과 Workflow 제어 책임을 나누면서 유연한 판단은 유지하되, 반복과 종료 조건은 예측 가능하도록 구성할 수 있었습니다.
+
+외부 Tool 연동에서는 정상 응답 여부뿐 아니라 **실제 변경 요청이 시작되는 시점과 실행 경계까지 검증해야 한다는 점**을 확인했습니다. 대상 유형 검증을 Write보다 먼저 수행하고 실제 수정 요청의 발생 여부를 회귀 테스트로 확인하면서, 외부 시스템을 변경하는 Tool에서는 실행 전 검증과 실행 후 검증을 함께 설계하는 것이 중요하다는 점을 배웠습니다.
+
+또한 Gmail 페이지네이션을 구현하면서 Provider가 제공하는 PageToken 구조를 UI에 그대로 노출하기보다 **Backend에서 Provider 상태와 UI 상태를 분리하고, 조회 방식과 Prefetch 전략을 함께 최적화하는 것이 사용자 체감 성능에 직접 연결될 수 있다는 점**을 확인했습니다.

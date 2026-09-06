@@ -211,7 +211,7 @@
 
   .prose :where(th):not(:where([class~="not-prose"] *)),
   .prose :where(td):not(:where([class~="not-prose"] *)) {
-    @apply px-6 py-4 align-middle m-0 whitespace-nowrap;
+    @apply px-6 py-4 align-middle m-0 whitespace-nowrap md:whitespace-normal md:break-words;
   }
 
   .prose tr{
@@ -290,6 +290,49 @@
   /* Headings carry **bold** markers in MDX; let the heading level own the weight. */
   .prose.project-mdx-refined :where(h3, h4, h5) strong {
     font-weight: inherit !important;
+  }
+
+  /* industrial-ai-platform의 8열 모델 비교표 전용 — 다른 표에는 영향 없음.
+     모바일은 기존 table-auto + nowrap + 가로 스크롤 그대로 유지하고,
+     md(768px) 이상에서만 열 비율을 고정해 본문 폭 안에 맞춘다. */
+  .model-compare-table table {
+    @apply md:table-fixed!;
+  }
+
+  .model-compare-table th,
+  .model-compare-table td {
+    @apply md:px-2! md:py-2!;
+  }
+
+  .model-compare-table th:nth-child(1),
+  .model-compare-table td:nth-child(1) { @apply md:w-[20%]!; }
+
+  .model-compare-table th:nth-child(2),
+  .model-compare-table td:nth-child(2) { @apply md:w-[11%]!; }
+
+  .model-compare-table th:nth-child(3),
+  .model-compare-table td:nth-child(3) { @apply md:w-[9%]!; }
+
+  .model-compare-table th:nth-child(4),
+  .model-compare-table td:nth-child(4) { @apply md:w-[11%]!; }
+
+  .model-compare-table th:nth-child(5),
+  .model-compare-table td:nth-child(5) { @apply md:w-[7%]!; }
+
+  .model-compare-table th:nth-child(6),
+  .model-compare-table td:nth-child(6) { @apply md:w-[12%]!; }
+
+  .model-compare-table th:nth-child(7),
+  .model-compare-table td:nth-child(7) { @apply md:w-[15%]!; }
+
+  .model-compare-table th:nth-child(8),
+  .model-compare-table td:nth-child(8) { @apply md:w-[13%]!; }
+
+  .model-compare-table th:nth-child(2),
+  .model-compare-table th:nth-child(3),
+  .model-compare-table th:nth-child(4),
+  .model-compare-table th:nth-child(5) {
+    @apply md:whitespace-nowrap!;
   }
 
 }

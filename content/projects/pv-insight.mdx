@@ -4,7 +4,7 @@ title: "RGB·열화상 기반 태양광 패널 관리 플랫폼"
 dates: "2026년 5월 ~ 2026년 7월"
 role: "AI 모델링 · 백엔드 개발 · 추론 서비스 연동"
 projectType: "팀 프로젝트"
-summary: "RGB와 열화상 이미지를 분석해 패널 이상을 탐지하고 점검 우선순위와 유지보수 판단을 지원하는 태양광 패널 관리 플랫폼입니다."
+summary: "RGB와 열화상 이미지를 분석해 패널 이상을 탐지하고 점검 우선순위와 유지보수 조치 후보를 제공하는 태양광 패널 관리 플랫폼입니다."
 coverImage: ""
 githubUrl: "https://github.com/solar-ai-dev/pv-fusion.git"
 demoUrl: ""
@@ -22,42 +22,44 @@ technologies:
 highlights:
   - title: "작은 이상 영역 탐지 성능 개선"
     items:
-      - "mask mAP50 0.68 → 0.71"
-      - "식생 침범 recall 0.41 → 0.57"
+      - "mask mAP50 +3.0%p 향상"
+      - "식생 침범 recall +16.0%p 향상"
+
   - title: "ONNX 추론 정합성 검증"
     items:
-      - "ONNX 변환 후 mask mAP50 0.709 유지"
-      - "모델 아티팩트 크기 약 29% 축소"
+      - "ONNX 변환 후 mask mAP50 0.71 유지"
+      - "배포 모델 아티팩트 크기 약 29.4% 축소"
+
   - title: "비동기 분석 흐름 구현"
     items:
       - "Spring Boot–SQS–FastAPI 연동"
-      - "조건부 상태 전환으로 중복 처리 완화"
+      - "조건부 상태 전환으로 중복 추론 방지"
 ---
 
 ## 프로젝트 개요
 
-태양광 발전소는 넓은 구역에 많은 패널이 설치되어 있어 모든 패널을 정기적으로 점검하려면 많은 시간과 인력이 필요합니다. 이미지 분석으로 이상 가능성이 높은 구역을 먼저 선별해 관리자의 점검 우선순위와 후속 조치 판단을 지원하는 것을 목표로 했습니다.
+태양광 발전소는 넓은 구역에 많은 패널이 설치되어 있어 모든 패널을 정기적으로 점검하려면 많은 시간과 인력이 필요합니다. 이미지 분석으로 이상 가능성이 높은 구역을 먼저 선별해 관리자가 우선 확인할 대상을 좁힐 수 있도록 하는 것을 목표로 했습니다.  
 
-RGB와 열화상 이미지는 확인할 수 있는 이상 유형이 달라 각각 별도의 모델로 분석합니다. **RGB 이미지에서는 파손, 식생 침범, 오염, 패널 누락, 음영의 5개 외관 이상을 분석하고 열화상 이미지에서는 국부 과열, 다이오드 동작 이상, 패널 연결 구간 고장의 3개 유형을 확인**합니다.
+RGB와 열화상 이미지는 확인할 수 있는 이상 유형이 달라 각각 별도의 모델로 분석합니다. **RGB 이미지에서는 파손, 식생 침범, 오염, 패널 누락, 음영의 5개 외관 이상을 분석하고 열화상 이미지에서는 국부 과열, 다이오드 동작 이상, 패널 연결 구간 고장의 3개 유형을 분석**합니다.
 
-분석 결과는 bounding box와 mask로 시각화하고 이상 유형에 따라 청소, 재촬영, 현장 점검, 교체 검토 등의 유지보수 조치 후보를 제공합니다. 이미지 등록부터 비동기 분석, 결과 저장과 조회까지 이어지는 서비스 흐름으로 구성했습니다.
+분석 결과는 bounding box와 mask로 시각화하고, 이상 유형에 따라 청소, 재촬영, 현장 점검, 교체 검토 등의 유지보수 조치 후보를 제공합니다.
 
 ## 담당 역할
 
-**RGB 세그멘테이션 모델링** 
+**RGB 세그멘테이션 모델링**
 
-- YOLOv26s-seg 기반 RGB 5개 클래스 모델의 입력 해상도, 라벨 정제, fine-tuning 조건을 비교해 작은 결함 탐지 성능 개선
-- 상위 성능을 보인 두 모델을 fine-tuning하고, validation 기준으로 checkpoint별 전체 및 클래스별 성능 비교
+- YOLOv26s-seg 기반 RGB 5개 클래스 모델의 입력 해상도, 라벨 정제, fine-tuning 조건 비교 및 작은 결함 탐지 성능 개선
+- 26개 checkpoint의 전체 및 클래스별 성능을 동일 Validation 조건에서 비교해 최종 모델 선정
 
 **ONNX 추론 및 FastAPI AI Worker 구현**
 
-- PyTorch 모델의 raw FP32 ONNX 변환·정합성 검증과 ONNX Runtime 기반 instance mask 후처리 구현
-- SQS 메시지 수신·검증, 분석 Job 조회·상태 전환과 처리 결과별 메시지 삭제를 수행하는 FastAPI AI Worker 구현
+- PyTorch 최종 모델을 raw FP32 ONNX로 변환하고, ONNX Runtime 기반 bounding box 및 instance mask 후처리와 정합성 검증
+- SQS 메시지 수신·검증, 분석 Job 상태 전환, 결과 저장 및 메시지 삭제 로직을 포함한 FastAPI AI Worker 구현
 
-**백엔드 구현 및 비동기 분석 연동**
+**백엔드 및 비동기 분석 연동**
 
-- Spring Boot 기반 이미지 등록, 분석 Job 생성·상태 관리와 결과 조회 기능 구현
-- Spring Boot의 SQS 메시지 발행과 FastAPI AI Worker의 메시지 처리 로직을 연결해 비동기 분석 흐름 구현
+- Spring Boot 기반 이미지 등록, 분석 Job 생성·조회, 분석 결과 조회 API 구현
+- Spring Boot의 SQS 메시지 발행과 FastAPI AI Worker 처리를 연결해 비동기 분석 흐름 구현
 
 ## 핵심 시스템 흐름
 
@@ -78,34 +80,40 @@ RGB와 열화상 이미지는 확인할 수 있는 이상 유형이 달라 각�
 
 #### **문제 상황**
 
-원본 RGB 이미지는 평균 약 2000px의 고해상도였지만, AWS 기반 추론 환경의 메모리 사용량과 처리 비용을 고려해 입력 해상도를 낮춰야 했습니다.  
-이 과정에서 **식생 침범과 파손처럼 작은 이상 영역의 픽셀 정보가 줄어 미탐이 증가했고, 전체 mask 성능과 클래스별 성능 편차 개선이 필요했습니다.**
-
-#### **해결 과정**
-
-##### **1. 입력 해상도 확대**
-
-- 동일한 조건에서 입력 해상도 1024와 1280 비교
-- mask mAP50-95가 0.42에서 0.43으로 향상된 1280 모델을 후속 실험의 기준으로 선정
-
-##### **2. 식생 침범 라벨 정제**
-
-- 전체 3,326장을 검수해 라벨 누락, 지나치게 작은 mask, 구분이 모호한 이미지 139장을 제외하고 3,187장으로 정리
-- 작은 mask 제거 기준을 달리한 두 전처리 방식을 비교해 식생 침범 성능 개선 폭이 더 컸던 강화형 기준을 최종 적용
-
-##### **3. fine-tuning 및 최종 모델 선정**
-
-- 상위 후보 두 모델을 각각 10 epoch fine-tuning하고 낮은 학습률, 앞부분 11개 레이어 고정, Mosaic·MixUp·CutMix 비활성화 조건 적용
-- 동일한 validation 기준에서 원본 모델과 epoch별 checkpoint의 전체 및 클래스별 성능을 비교해 성능 균형이 가장 좋았던 epoch 5 checkpoint를 최종 모델로 선정
+원본 RGB 이미지는 평균 약 2000px의 고해상도였지만, AWS 기반 추론 환경의 메모리 사용량과 처리 비용을 고려해 입력 해상도를 낮춰야 했습니다. 이 과정에서 **식생 침범과 파손처럼 작은 이상 영역의 미탐이 두드러져 전체 mask 성능과 클래스별 성능 개선이 필요했습니다.**
+<TroubleshootingSteps
+  steps={[
+    {
+      title: "입력 해상도 확대",
+      items: [
+        "입력 해상도 1024와 1280을 동일 조건에서 비교해 mask mAP50-95가 0.42에서 0.43으로 향상된 1280을 후속 실험 기준으로 선정",
+      ],
+    },
+    {
+      title: "식생 침범 라벨 정제",
+      items: [
+        "전체 3,326장을 검수해 라벨 누락, 지나치게 작은 mask, 구분이 모호한 이미지 139장을 제외하고 3,187장으로 정리",
+        "작은 mask 제거 기준을 달리한 두 전처리 방식을 비교해 식생 침범 성능 개선 폭이 더 컸던 강화형 기준을 최종 적용",
+      ],
+    },
+    {
+      title: "fine-tuning 및 최종 모델 선정",
+      items: [
+        "해상도와 라벨 정제 실험에서 상위 성능을 보인 두 모델을 각각 10 epoch fine-tuning하고 낮은 학습률, 앞부분 11개 레이어 고정, Mosaic·MixUp·CutMix 비활성화 조건 적용",
+        "동일한 validation에서 원본 모델과 26개 checkpoint의 전체 mask mAP와 클래스별 Precision·Recall을 비교해 epoch 5 checkpoint를 최종 모델로 선정",
+      ],
+    },
+  ]}
+/>
 
 #### **결과**
 
-validation mask mAP50은 **0.68에서 0.71로**, 식생 침범 mask recall은 **0.41에서 0.57로** 상승해 작은 객체의 미탐 감소 효과를 확인했습니다.
+validation mask mAP50은 **+3.0%p 향상해 0.71**, 식생 침범 mask recall은 **+16.0%p 향상해 0.57**을 기록했습니다.
 
 | 핵심 지표 | 개선 전 | 개선 후 | 변화 |
 | :---: | :---: | :---: | :---: |
-| validation mask mAP50 | 0.68 | 0.71 | +0.03 |
-| 식생 침범 mask recall | 0.41 | 0.57 | +0.16 |
+| validation mask mAP50 | 0.68 | 0.71 | +3.0%p |
+| 식생 침범 mask recall | 0.41 | 0.57 | +16.0%p |
 
 #### **추가 실험**
 
@@ -113,50 +121,85 @@ validation mask mAP50은 **0.68에서 0.71로**, 식생 침범 mask recall은 **
 
 - Slicing Aided Hyper Inference (SAHI) 기반 타일 추론 — 처리 시간이 약 3배 증가해 서비스 적용에서 제외
 - 패널 어레이 기반 동적 crop 추론 — 이미지당 평균 13.6회의 반복 추론이 필요해 제외
-- 오염(dusty) 클래스 개선 실험 — 별도 모델과 라벨 정제 모두 test 일반화 또는 전체 성능이 하락해 제외
+- 오염(dusty) 클래스 개선 실험 — dusty 1-class 분리와 5-class 라벨 정제를 비교했으나 성능 개선이 없어 제외
 - 파손(broken) 클래스 보강 fine-tuning — recall은 상승했지만 precision과 종합 성능이 하락해 제외
 
 
-### **02. ONNX Runtime 원시 출력의 instance mask 복원**
+### **02. ONNX 원시 출력 후처리 오류 해결 및 추론 정합성 검증**
 
 #### **문제 상황**
 
-Ultralytics 추론에서는 bounding box와 instance mask 후처리가 자동으로 제공되지만 raw ONNX 모델은 원시 tensor만 반환해 별도의 후처리가 필요했습니다. 초기 후처리에서 **letterbox의 축소 비율과 여백이 정확히 복원되지 않아 서비스 화면의 결함 박스와 세그멘테이션 영역이 실제 위치와 어긋나는 문제가 있었습니다.**
+Ultralytics에서는 bounding box와 instance mask 후처리가 자동으로 제공되지만 raw ONNX 모델은 원시 tensor만 반환해 별도의 후처리가 필요했습니다. 초기 구현에서 **letterbox의 축소 비율과 여백이 정확히 복원되지 않아 bounding box와 instance mask가 실제 결함 위치와 어긋나는 문제**가 발생했습니다.
 
-#### **해결 과정**
-
-##### **1. ONNX 변환 및 출력 검증**
-
-- 최종 RGB 모델을 raw FP32 ONNX로 변환하고 ONNX checker와 ONNX Runtime으로 모델 로딩 및 출력 구조 검증
-- 동일한 validation 308장에서 PyTorch와 ONNX Runtime의 성능을 비교하고, 동일 이미지의 bounding box와 instance mask 정합성 검증
-
-##### **2. instance mask 후처리 구현**
-
-- letterbox와 정규화 전처리 후 confidence 필터링, 클래스별 NMS와 원본 좌표 복원 구현
-- mask coefficient와 prototype을 결합하고 sigmoid, crop, resize를 적용해 객체별 instance mask 복원
-- 같은 validation set에서 후처리 조건을 비교해 confidence 0.15, NMS IoU 0.40, mask threshold 0.30을 최종 적용
-
-##### **3. AI Worker 적용 및 모델 검증**
-
-- ONNX Runtime 추론과 후처리 모듈을 FastAPI AI Worker에 적용하고 모델 설정을 manifest로 관리
-- SHA-256 검증과 smoke test로 모델 파일의 무결성과 정상 로딩 여부 확인
+<TroubleshootingSteps
+  steps={[
+    {
+      title: "ONNX 변환 및 출력 검증",
+      items: [
+        "최종 RGB 모델을 raw FP32 ONNX로 변환하고 ONNX checker와 ONNX Runtime으로 모델 로딩 및 출력 구조 검증",
+        "동일한 validation 308장에서 PyTorch와 ONNX Runtime 성능 비교 및 동일 이미지의 bounding box와 instance mask 정합성 검증",
+      ],
+    },
+    {
+      title: "instance mask 후처리 구현",
+      items: [
+        "letterbox와 정규화 전처리 후 confidence 필터링, 클래스별 NMS와 원본 좌표 복원 구현",
+        "mask coefficient와 prototype 출력을 결합해 객체별 segmentation 결과를 복원하고, validation 비교 후 confidence 0.15, NMS IoU 0.40, mask threshold 0.30을 적용",
+      ],
+    },
+    {
+      title: "AI Worker 적용 및 모델 검증",
+      items: [
+        "ONNX Runtime 추론·후처리 모듈을 FastAPI AI Worker에 적용, manifest와 SHA-256 및 smoke test로 모델 설정과 정상 로딩 여부 검증",
+      ],
+    },
+  ]}
+/>
 
 #### **결과**
 
-동일한 validation 308장에서 PyTorch와 ONNX Runtime을 비교한 결과, **mask mAP50은 0.706 → 0.709, mAP50-95는 0.438 → 0.440으로 변환 후 성능이 유지**됐습니다.
-
-| Runtime | Mask Precision | Mask Recall | mask mAP50 | mask mAP50-95 |
+PyTorch와 ONNX 비교에서 **bounding box IoU 중앙값 0.984–0.998, instance mask IoU 중앙값 0.959–0.997로 정합성을 확인**했고, **segmentation 성능을 유지하면서 배포 모델 아티팩트 크기를 약 29.4% 축소**했습니다.
+| 모델 | Artifact | Mask Recall | Mask mAP50 | E2E Mean |
 | :---: | :---: | :---: | :---: | :---: |
-| PyTorch | 0.691 | 0.651 | 0.706 | 0.438 |
-| ONNX Runtime | 0.680 | 0.649 | 0.709 | 0.440 |
+| PyTorch FP32 | 57.04 MB | 0.651 | 0.706 | 2037 ms |
+| ONNX FP32 | 40.29 MB | 0.649 | 0.709 | 2189 ms |
+| **변화** | **-29.4%** | **-0.2%p** | **+0.3%p** | **+7.5%** |
 
-PyTorch와 ONNX에서 매칭된 객체를 비교한 결과, **bounding box와 instance mask가 높은 수준으로 일치했으며 모델 아티팩트 크기를 PyTorch 대비 약 29% 감소**할 수 있었습니다.
+### **추가 검증: 정적 INT8 양자화(Static Post-Training Quantization, PTQ)**
 
-| 비교 항목 | 이미지별 중앙값 범위 |
-| :---: | :---: |
-| bounding box IoU | 0.984–0.998 |
-| mask IoU | 0.959–0.997 |
+재학습 없이 FP32 ONNX의 배포 아티팩트 크기와 CPU 추론 효율을 개선할 수 있는지 확인하기 위해 정적 PTQ를 적용했습니다. **아티팩트 크기는 71.8% 감소**했지만 Mask Recall은 6.5%p, mAP50은 2.8%p 하락했고 평균 E2E latency는 29.4% 증가해 **INT8은 최종 적용하지 않았습니다.**
 
+<TroubleshootingSteps
+  title="검증 절차"
+  steps={[
+    {
+      title: "Static PTQ 적용",
+      items: [
+        "Train 500장을 calibration subset으로 구성해 QDQ, S8S8, weight per-channel, MinMax 설정으로 ONNX Runtime Static PTQ 적용",
+      ],
+    },
+    {
+      title: "성능 및 latency 비교",
+      items: [
+        "Validation 308장에서 segmentation 성능을 비교하고, 동일 Google Colab CPU에서 20개 이미지를 모델별 3회 반복해 E2E latency 측정",
+      ],
+    },
+  ]}
+/>
+
+| 모델 | Artifact | Mask Recall | Mask mAP50 | E2E Mean |
+| :---: | :---: | :---: | :---: | :---: |
+| ONNX FP32 | 40.29 MB | 0.649 | 0.709 | 2189 ms |
+| ONNX INT8 | 11.38 MB | 0.584 | 0.681 | 2833 ms |
+| **변화** | **-71.8%** | **-6.5%p** | **-2.8%p** | **+29.4%** |
+
+<div className="not-prose mt-3 space-y-1 text-sm leading-6 text-muted-foreground">
+
+※ quantization preprocessing 적용 후 재양자화했지만 동일 CPU 환경에서 latency 개선 없음.
+
+※ imgsz=1280, batch=1 기준. 성능 평가는 conf=0.001, NMS IoU=0.70, latency는 서비스 조건(conf=0.15, NMS IoU=0.40, mask threshold=0.30) 적용.
+
+</div>
 
 ### **03. 조건부 상태 전이로 SQS 중복 추론 방지**
 
@@ -164,22 +207,24 @@ PyTorch와 ONNX에서 매칭된 객체를 비교한 결과, **bounding box와 in
 
 이미지 추론을 사용자 HTTP 요청과 분리하기 위해 SQS 기반 비동기 작업으로 구성했습니다. 그러나 **동일 메시지의 재전달이나 여러 Worker의 동시 수신으로 추론과 결과 저장이 중복 실행될 가능성이 있었습니다.**
 
-#### **해결 과정**
-
-##### **1. 메시지와 분석 대상 검증**
-
-- jobId, imageId와 데이터베이스 조회 결과를 검증하고 QUEUED 상태의 Job만 처리 대상으로 구분
-- RUNNING, SUCCEEDED, FAILED 상태는 추가 추론 대상에서 제외
-
-##### **2. 조건부 상태 전환**
-
-- QUEUED 상태인 Job만 RUNNING으로 변경하고 상태 전환에 성공한 Worker만 추론 수행
-- 처리 결과에 따라 SUCCEEDED 또는 오류 정보를 포함한 FAILED 상태로 변경
-
-##### **3. 메시지 삭제 시점 분리**
-
-- Job 상태와 처리 결과를 데이터베이스에 반영한 뒤 SQS 메시지 삭제
-- 정상 완료와 재시도가 필요한 오류를 구분해 메시지 삭제 정책 적용
+<TroubleshootingSteps
+  steps={[
+    {
+      title: "처리 대상 검증 및 실행 권한 획득",
+      items: [
+        "수신 메시지의 jobId와 imageId 유효성 및 데이터베이스 조회 결과와의 일치 여부를 검증하고, QUEUED 상태의 Job만 처리 대상으로 구분",
+        "QUEUED에서 RUNNING으로의 조건부 update에 성공한 Worker만 처리 권한을 획득한 것으로 판단하고 추론 수행",
+      ],
+    },
+    {
+      title: "처리 결과 반영 및 메시지 삭제",
+      items: [
+        "처리 성공 시 SUCCEEDED, 실패 시 오류 코드와 메시지를 포함한 FAILED 상태로 반영",
+        "Job 상태와 처리 결과를 먼저 반영한 뒤, 처리 완료 또는 재처리가 필요 없는 경우에만 메시지를 삭제하고 재시도가 필요한 오류는 삭제하지 않도록 처리",
+      ],
+    },
+  ]}
+/>
 
 #### **결과**
 
@@ -188,6 +233,6 @@ QUEUED에서 RUNNING으로의 **조건부 상태 전환에 성공한 하나의 W
 
 ## 회고 및 배운점
 
-다중 클래스 instance segmentation을 수행하면서 전체 평균 성능뿐 아니라 클래스별 성능 편차와 작은 객체의 미탐을 함께 보는 것이 중요하다는 점을 알게 되었습니다. 입력 해상도와 라벨 품질을 조정하고 SAHI 기반 sliced inference 같은 작은 객체 탐지 방법도 비교하면서, 성능 개선뿐 아니라 추론 비용과 서비스 적용 가능성까지 함께 고려했습니다.
+작은 이상 영역은 전체 평균 지표만으로 문제를 확인하기 어려워 클래스별 Recall과 예측 결과를 함께 확인해야 했습니다. 입력 해상도와 라벨 품질을 조정하고 SAHI와 동적 crop 방식까지 비교하면서, 성능이 개선되더라도 반복 추론 비용이 커지면 서비스에서는 적용하기 어렵다는 점을 확인했습니다.
 
-ONNX 변환에서는 변환 전후의 성능과 출력 정합성을 실제 추론 환경에서 함께 검증했고, SQS 비동기 처리에서는 Job 상태 전이와 메시지 삭제 시점을 함께 설계했습니다. 이를 통해 모델을 서비스에 적용할 때는 모델 성능뿐 아니라 추론 환경과 상태 관리까지 함께 고려해야 한다는 점을 배웠습니다.
+또한 ONNX 변환은 속도 향상을 전제로 판단하지 않고 변환 전후의 성능 정합성, 아티팩트 크기와 실제 CPU latency를 함께 비교했습니다. INT8도 아티팩트 크기는 크게 줄었지만 Recall과 latency가 악화되어 적용하지 않았습니다. SQS 기반 비동기 처리에서는 모델 추론뿐 아니라 Job 상태 전이와 메시지 삭제 순서가 중복 실행과 재시도 동작에 직접 영향을 준다는 점을 확인했습니다.

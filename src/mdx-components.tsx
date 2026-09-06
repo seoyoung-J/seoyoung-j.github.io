@@ -4,7 +4,11 @@ import { CaseSection, Paragraphs } from "@/components/project-detail/case-sectio
 import { DemoVideo } from "@/components/project-detail/demo-video";
 import { ProjectFigure } from "@/components/project-detail/project-figure";
 import { ProjectFlow } from "@/components/project-detail/project-flow";
+import { ServiceArchitecture } from "@/components/project-detail/service-architecture";
 import { SimpleArrowList } from "@/components/project-detail/simple-arrow-list";
+import { TroubleshootingSummary } from "@/components/project-detail/troubleshooting-summary";
+import { TroubleshootingSteps } from "@/components/project-detail/troubleshooting-steps";
+import { VerdictNote } from "@/components/project-detail/verdict-note";
 import type { ComponentProps } from "react";
 
 type CodeProps = ComponentProps<"code"> & {
@@ -22,8 +26,12 @@ export const mdxComponents = {
   Paragraphs,
   ProjectFigure,
   ProjectFlow,
+  ServiceArchitecture,
   ProjectBody,
   SimpleArrowList,
+  TroubleshootingSummary,
+  TroubleshootingSteps,
+  VerdictNote,
   pre: (props: ComponentProps<"pre">) => <CodeBlock {...props} />,
   hr: (props: ComponentProps<"hr">) => (
     <div className="my-10 flex w-full items-center" {...props}>

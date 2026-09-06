@@ -61,17 +61,25 @@ resultImage:
 
 공구 고장까지 남은 실제 cycle 수인 CycleToFailure를 그대로 타깃으로 사용했을 때 **GroupKFold 기준 R²가 모두 음수로 나타나 예측 성능이 기준 수준에 미치지 못했습니다.** 이에 절대 잔여 cycle 수를 그대로 타깃으로 사용하는 구성이 적절한지 다시 검토할 필요가 있었습니다.
 
-#### **해결 과정**
-
-##### **1. 타깃 구성 비교**
-
-- CycleToFailure와 이를 0~1 범위로 정규화한 CycleToFailureNormalized 비교
-- RandomForestRegressor를 기준 모델로 두고 NumberOfCycle 포함 여부를 조합해 동일한 GroupKFold 조건에서 평가
-
-##### **2. 공구 사용 이력 변수 검증**
-
-- 공구의 누적 사용 순서를 나타내는 NumberOfCycle 포함 여부에 따른 성능 비교
-- CycleToFailureNormalized와 NumberOfCycle을 함께 사용한 구성을 이후 모델 실험의 입력 구성으로 선정
+<TroubleshootingSteps
+  title="해결 과정"
+  steps={[
+    {
+      title: "타깃 구성 비교",
+      items: [
+        "CycleToFailure와 이를 0~1 범위로 정규화한 CycleToFailureNormalized 비교",
+        "RandomForestRegressor를 기준 모델로 두고 NumberOfCycle 포함 여부를 조합해 동일한 GroupKFold 조건에서 평가",
+      ],
+    },
+    {
+      title: "공구 사용 이력 변수 검증",
+      items: [
+        "공구의 누적 사용 순서를 나타내는 NumberOfCycle 포함 여부에 따른 성능 비교",
+        "CycleToFailureNormalized와 NumberOfCycle을 함께 사용한 구성을 이후 모델 실험의 입력 구성으로 선정",
+      ],
+    },
+  ]}
+/>
 
 #### **결과**
 
@@ -83,23 +91,33 @@ CycleToFailure를 사용한 조합에서는 R²가 모두 음수였지만, Cycle
 
 7개 회귀 모델을 비교하고 상위 모델을 튜닝한 결과 ExtraTreesRegressor를 후속 실험의 기준 모델로 선정했습니다. 그러나 **전체 피처를 사용한 13-fold GroupKFold 평가에서 평균 R²는 0.79였고, 상위 피처 사이에도 높은 상관관계가 확인됐습니다.** 예측에 필요한 정보를 유지하면서 피처 구성을 최적화할 필요가 있었습니다.
 
-#### **해결 과정**
-
-##### **1. Top-N 피처 비교**
-
-- ExtraTrees Feature Importance를 기준으로 Top-10, Top-20, Top-30과 전체 피처 구성 비교
-- 동일한 ExtraTrees와 13-fold GroupKFold 조건에서 평가해 평균 R²가 가장 높았던 Top-30 선정
-
-##### **2. 상관관계 기반 피처 축소 검증**
-
-- 상관계수 0.9 이상인 피처를 그룹화하고 각 그룹에서 Feature Importance가 가장 높은 대표 피처 선택
-- Top-30을 16개 피처로 축소한 Reduced 구성과 기존 Top-30을 동일 조건에서 비교
-- Reduced 구성의 성능이 낮아 Top-30 유지
-
-##### **3. 추가 하이퍼파라미터 튜닝**
-
-- Top-30 피처 구성을 고정한 상태에서 GridSearchCV와 Optuna 기반 추가 튜닝 결과 비교
-- 두 추가 튜닝 결과 모두 기존 Top-30 ExtraTrees의 성능을 넘지 못해 미채택
+<TroubleshootingSteps
+  title="해결 과정"
+  steps={[
+    {
+      title: "Top-N 피처 비교",
+      items: [
+        "ExtraTrees Feature Importance를 기준으로 Top-10, Top-20, Top-30과 전체 피처 구성 비교",
+        "동일한 ExtraTrees와 13-fold GroupKFold 조건에서 평가해 평균 R²가 가장 높았던 Top-30 선정",
+      ],
+    },
+    {
+      title: "상관관계 기반 피처 축소 검증",
+      items: [
+        "상관계수 0.9 이상인 피처를 그룹화하고 각 그룹에서 Feature Importance가 가장 높은 대표 피처 선택",
+        "Top-30을 16개 피처로 축소한 Reduced 구성과 기존 Top-30을 동일 조건에서 비교",
+        "Reduced 구성의 성능이 낮아 Top-30 유지",
+      ],
+    },
+    {
+      title: "추가 하이퍼파라미터 튜닝",
+      items: [
+        "Top-30 피처 구성을 고정한 상태에서 GridSearchCV와 Optuna 기반 추가 튜닝 결과 비교",
+        "두 추가 튜닝 결과 모두 기존 Top-30 ExtraTrees의 성능을 넘지 못해 미채택",
+      ],
+    },
+  ]}
+/>
 
 #### **결과**
 
