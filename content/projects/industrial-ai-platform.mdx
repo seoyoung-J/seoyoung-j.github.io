@@ -164,19 +164,19 @@ Mask Loss 적용 단일 feature는 기본 구성보다 **Validation PRO를 0.684
 | Teacher (성능형) | 0.972 | 0.919 | 0.984 | 0.747 | 6.4 img/s | 155.1 ms | 847.5MB |
 | SPEED (속도형) | 0.991 | 0.966 | 0.981 | 0.779 | 20.8 img/s | 48.0 ms | 89.8MB |
 | **Student (경량형)** | **0.995** | 0.959 | 0.972 | 0.760 | **76.4 img/s** | **13.1 ms** | **84.2MB** |
-| **Teacher 대비 변화** | +0.023 | +0.040 | -0.012 | +0.013 | 약 11.9배 | -91.6% | -90.1% |
+| Teacher 대비 변화 | +0.023 | +0.040 | -0.012 | +0.013 | 약 11.9배 | -91.6% | -90.1% |
 
 </div>
 
 <div className="not-prose mt-3 space-y-1 text-sm leading-6 text-muted-foreground">
 
-※ img/s는 초당 평균 처리 이미지 수.
+※ img/s는 초당 평균 처리 이미지 수를 의미함.  
 
-※ 평균 시간은 batch size 4 기준 전체 inference pipeline 처리 시간을 이미지 수로 나눈 이미지 1장당 평균 처리 시간.
+※ 평균 시간은 batch size 4 기준 전체 inference pipeline 처리 시간을 이미지 수로 나눈 이미지 1장당 평균 처리 시간을 의미함.
 
 </div>
 
-Student는 **Teacher 대비 처리 속도 약 11.9배 향상·GPU Memory 90.1% 절감**했고, SPEED보다 PRO는 소폭 낮지만 처리 속도는 약 3.7배 높아 **카테고리 특화 경량 모델 후보로서의 적용 가능성을 확인했습니다.**
+Student는 Teacher 대비 **초당 처리 이미지 수를 약 11.9배 높이고 GPU Memory를 90.1% 절감**했습니다. SPEED보다 PRO는 소폭 낮았지만 **76.4 img/s로 약 3.7배 빠른 처리 성능을 보여, 카테고리 특화 경량 모델 후보로서의 적용 가능성을 확인**했습니다.
 
 ## 회고 및 배운점
 
