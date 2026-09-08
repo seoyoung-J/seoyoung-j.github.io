@@ -61,11 +61,11 @@ const REFINED_TYPOGRAPHY_SLUGS = new Set(["pv-insight", "industrial-ai-platform"
 // Projects whose GitHub link should stay in the data but not render as a UI button.
 const HIDE_GITHUB_LINK_SLUGS = new Set(["video-ad-detection-transform"]);
 
-// Projects whose "최종 결과" card renders their demoVideo (with autoplay/loop) instead of
+// Projects whose "최종 결과" card renders their demoVideo (autoplay, no loop) instead of
 // the default result image, keeping the "최종 결과" heading rather than the "시연 영상" one.
 const RESULT_VIDEO_CAPTIONS: Record<string, string> = {
   "video-ad-detection-transform":
-    "YOLO11s와 SAM2로 광고 영역을 탐지·분할하고 원근 변환과 이미지 블렌딩을 적용한 영상 합성 결과",
+    "YOLO11s·SAM2 기반 광고 영역 탐지·분할 및 원근 변환 광고 합성 결과",
 };
 
 export function generateStaticParams() {
@@ -128,19 +128,13 @@ export default async function ProjectPage({
                 최종 결과
               </h2>
               <div className="mt-4">
-                <figure className="not-prose space-y-3">
-                  <video
-                    src={project.demoVideo}
-                    autoPlay
-                    muted
-                    playsInline
-                    controls
-                    className="aspect-video w-full rounded-md border border-border bg-black"
-                  />
-                  <figcaption className="text-sm leading-6 text-muted-foreground">
-                    {RESULT_VIDEO_CAPTIONS[project.slug]}
-                  </figcaption>
-                </figure>
+                <DemoVideo
+                  src={project.demoVideo}
+                  caption={RESULT_VIDEO_CAPTIONS[project.slug]}
+                  autoPlay
+                  muted
+                  captionAlign="center"
+                />
               </div>
             </section>
           ) : project.demoVideo ? (

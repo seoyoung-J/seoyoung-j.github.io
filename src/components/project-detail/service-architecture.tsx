@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export type ServiceFlowStep = {
   title: string;
@@ -41,6 +42,13 @@ type ServiceArchitectureProps = {
   stepsTitle?: string;
   stepsAriaLabel?: string;
   steps?: ServiceFlowStep[];
+  /**
+   * Set to false to hide the "imageTitle"/"stepsTitle" column headings —
+   * useful when a section heading above this component already covers
+   * their role. Opt-in only; omitting this prop keeps both column titles
+   * visible as before.
+   */
+  showColumnTitles?: boolean;
 };
 
 export function ServiceArchitecture({
@@ -52,14 +60,20 @@ export function ServiceArchitecture({
   stepsTitle = "서비스 흐름",
   stepsAriaLabel = "서비스 처리 단계",
   steps = DEFAULT_STEPS,
+  showColumnTitles = true,
 }: ServiceArchitectureProps) {
   return (
     <div className="not-prose mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
       <section className="min-w-0 lg:grid lg:h-full lg:grid-rows-[auto_1fr]">
-        <div className="text-base font-semibold tracking-tight text-foreground">
-          {imageTitle}
+        <div className={showColumnTitles ? "text-base font-semibold tracking-tight text-foreground" : undefined}>
+          {showColumnTitles ? imageTitle : null}
         </div>
-        <div className="mt-4 overflow-hidden rounded-xl border border-border/70 bg-background p-1">
+        <div
+          className={cn(
+            "overflow-hidden rounded-xl border border-border/70 bg-background p-1",
+            showColumnTitles && "mt-4"
+          )}
+        >
           <Image
             src={imageSrc}
             alt={imageAlt}
@@ -72,10 +86,15 @@ export function ServiceArchitecture({
       </section>
 
       <section className="min-w-0 lg:grid lg:h-full lg:grid-rows-[auto_1fr]">
-        <div className="text-base font-semibold tracking-tight text-foreground">
-          {stepsTitle}
+        <div className={showColumnTitles ? "text-base font-semibold tracking-tight text-foreground" : undefined}>
+          {showColumnTitles ? stepsTitle : null}
         </div>
-        <div className="mt-4 flex rounded-xl border border-border/70 bg-background p-4">
+        <div
+          className={cn(
+            "flex rounded-xl border border-border/70 bg-background p-4",
+            showColumnTitles && "mt-4"
+          )}
+        >
           <ol
             aria-label={stepsAriaLabel}
             className="relative m-0 flex w-full list-none flex-col gap-5 p-0 before:absolute before:top-2.5 before:bottom-2.5 before:left-4 before:w-px before:bg-border before:content-[''] lg:h-full lg:justify-between lg:gap-0"
