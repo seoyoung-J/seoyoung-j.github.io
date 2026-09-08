@@ -22,6 +22,7 @@ function getSortedProjects() {
   );
 
   return [...portfolioProjects]
+    .filter((project) => project.showOnHome !== false)
     .sort((a, b) => a.order - b.order)
     .map((project) => projectsBySlug.get(project.slug))
     .filter((project): project is ProjectDetail => Boolean(project));
