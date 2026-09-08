@@ -40,6 +40,7 @@ const projects = defineCollection({
         role: z.string(),
         projectType: z.string(),
         summary: z.string(),
+        published: z.boolean().optional().default(true),
         coverImage: z.string().optional().default(""),
         githubUrl: z.string().optional().default(""),
         demoUrl: z.string().optional().default(""),

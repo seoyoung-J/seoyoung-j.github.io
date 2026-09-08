@@ -1,11 +1,11 @@
 import Image from "next/image";
 
-type FlowStep = {
+export type ServiceFlowStep = {
   title: string;
   description: string;
 };
 
-const flowSteps: FlowStep[] = [
+const DEFAULT_STEPS: ServiceFlowStep[] = [
   {
     title: "업무 요청",
     description: "자연어 업무 요청 입력",
@@ -32,19 +32,39 @@ const flowSteps: FlowStep[] = [
   },
 ];
 
-export function ServiceArchitecture() {
+type ServiceArchitectureProps = {
+  imageTitle?: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  stepsTitle?: string;
+  stepsAriaLabel?: string;
+  steps?: ServiceFlowStep[];
+};
+
+export function ServiceArchitecture({
+  imageTitle = "시스템 아키텍처",
+  imageSrc = "/projects/google-work-agent/system-architecture.png",
+  imageAlt = "Google Work Agent 시스템 아키텍처",
+  imageWidth = 1718,
+  imageHeight = 916,
+  stepsTitle = "서비스 흐름",
+  stepsAriaLabel = "서비스 처리 단계",
+  steps = DEFAULT_STEPS,
+}: ServiceArchitectureProps) {
   return (
     <div className="not-prose mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
       <section className="min-w-0 lg:grid lg:h-full lg:grid-rows-[auto_1fr]">
         <div className="text-base font-semibold tracking-tight text-foreground">
-          시스템 아키텍처
+          {imageTitle}
         </div>
         <div className="mt-4 overflow-hidden rounded-xl border border-border/70 bg-background p-1">
           <Image
-            src="/projects/google-work-agent/system-architecture.png"
-            alt="Google Work Agent 시스템 아키텍처"
-            width={1718}
-            height={916}
+            src={imageSrc}
+            alt={imageAlt}
+            width={imageWidth}
+            height={imageHeight}
             className="block h-auto w-full object-contain"
             sizes="(min-width: 1024px) 59vw, 100vw"
           />
@@ -53,14 +73,14 @@ export function ServiceArchitecture() {
 
       <section className="min-w-0 lg:grid lg:h-full lg:grid-rows-[auto_1fr]">
         <div className="text-base font-semibold tracking-tight text-foreground">
-          서비스 흐름
+          {stepsTitle}
         </div>
         <div className="mt-4 flex rounded-xl border border-border/70 bg-background p-4">
           <ol
-            aria-label="서비스 처리 단계"
+            aria-label={stepsAriaLabel}
             className="relative m-0 flex w-full list-none flex-col gap-5 p-0 before:absolute before:top-2.5 before:bottom-2.5 before:left-4 before:w-px before:bg-border before:content-[''] lg:h-full lg:justify-between lg:gap-0"
           >
-            {flowSteps.map((step, index) => (
+            {steps.map((step, index) => (
               <li
                 key={step.title}
                 className="relative grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-2"

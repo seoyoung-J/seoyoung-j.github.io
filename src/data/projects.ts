@@ -25,6 +25,7 @@ export type ProjectDetail = {
   role: string;
   projectType: string;
   summary: string;
+  published?: boolean;
   coverImage?: string;
   githubUrl?: string;
   demoUrl?: string;
@@ -137,10 +138,33 @@ export const portfolioProjects = [
   description:
     "Google Workspace 데이터를 조회·분석해 업무를 수행하는 Agent 시스템입니다. 6개 Agent Workflow와 결정적 Supervisor Routing을 구현했습니다.",
   technologies: ["LangGraph", "Python", "FastAPI", "MCP"],
-  image: "",
+  image: "/projects/google-work-agent/mcp-work-agent-thumbnail.png",
   githubUrl: "",
   demoUrl: "",
   showOnHome: false,
   order: 5,
+  },
+
+  {
+    slug: "video-ad-detection-transform",
+    title: "영상 내 옥외광고 자동 탐지 및 변환",
+    href: "/projects/video-ad-detection-transform",
+    dates: "2025년 2월 ~ 2025년 3월",
+    description:
+      "YOLO11s로 영상 속 옥외광고를 탐지하고 SAM2로 광고 영역을 분할한 뒤, 원근 변환과 이미지 블렌딩을 적용해 새로운 광고 이미지를 합성하는 영상 처리 파이프라인을 구현했습니다.",
+    technologies: [
+      "Python",
+      "OpenCV",
+      "YOLO11",
+      "SAM2",
+      "Supervision",
+      "MoviePy",
+      "Roboflow",
+    ],
+    image: "/projects/video-ad-detection-transform/video-ad-detection-transform-thumbnail.png",
+    githubUrl: "https://github.com/seoyoung-J/video-ad-detection-transform",
+    demoUrl: "",
+    showOnHome: true,
+    order: 6,
   },
 ] satisfies PortfolioProject[];

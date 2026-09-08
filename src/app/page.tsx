@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 import { portfolioProjects } from "@/data/projects";
 import { DATA } from "@/data/resume";
 import { ArrowUpRight } from "lucide-react";
+import { allProjects } from "content-collections";
 import Link from "next/link";
 
 const BLUR_FADE_DELAY = 0.04;
+
+// Projects whose GitHub link should stay in the data but not render as a card link.
+const HIDE_GITHUB_LINK_SLUGS = new Set(["video-ad-detection-transform"]);
 
 function SkillBadge({ skill }: { skill: string }) {
   return (
@@ -34,8 +38,17 @@ function SectionTitle({
 }
 
 export default function Page() {
+  // A project's publish status lives only in its MDX frontmatter (allProjects);
+  // join by slug so an unpublished project never shows on the home page even
+  // if showOnHome was left true.
+  const publishedSlugs = new Set(
+    allProjects
+      .filter((project) => project.published !== false)
+      .map((project) => project.slug)
+  );
+
   const projects = [...portfolioProjects]
-    .filter((project) => project.showOnHome)
+    .filter((project) => project.showOnHome && publishedSlugs.has(project.slug))
     .sort((a, b) => a.order - b.order);
 
   return (
@@ -156,7 +169,7 @@ export default function Page() {
                   image={project.image}
                   href={project.href}
                   links={[
-                    ...(project.githubUrl
+                    ...(project.githubUrl && !HIDE_GITHUB_LINK_SLUGS.has(project.slug)
                       ? [
                           {
                             icon: <ArrowUpRight className="size-3" />,
