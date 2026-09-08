@@ -1,11 +1,10 @@
-import { ModeToggle } from "@/components/mode-toggle";
 import { DATA } from "@/data/resume";
 import Link from "next/link";
 
 const topNavItems = [
   { href: "/", label: "Home" },
-  { href: "#skills", label: "Skills" },
-  { href: "#projects", label: "Projects" },
+  { href: "/#skills", label: "Skills" },
+  { href: "/#projects", label: "Projects" },
 ];
 
 export default function TopNavbar() {
@@ -28,7 +27,6 @@ export default function TopNavbar() {
               {item.label}
             </Link>
           ))}
-          <ModeToggle className="size-8 rounded-md text-muted-foreground hover:text-slate-600 dark:hover:text-slate-300" />
         </div>
       </nav>
     </header>
